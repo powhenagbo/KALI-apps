@@ -1,0 +1,168 @@
+Metadata-Version: 2.4
+Name: kali-apps
+Version: 1.0.0
+Summary: KALI genome analysis CLI toolkit (k-mer hashing, distance trees, tensor labeling, genome downloading, and related tools)
+License: MIT
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: biopython>=1.81
+Requires-Dist: numpy>=1.24
+Requires-Dist: pandas>=2.0
+Requires-Dist: scipy>=1.10
+Requires-Dist: dendropy>=4.6
+Requires-Dist: matplotlib>=3.7
+Requires-Dist: scikit-learn>=1.3
+Requires-Dist: openpyxl>=3.1
+Requires-Dist: seaborn>=0.12
+Provides-Extra: web
+Requires-Dist: flask>=3.0; extra == "web"
+Requires-Dist: gunicorn>=21.0; extra == "web"
+
+# kali-apps
+
+This single folder contains both:
+- **The CLI toolkit** (`src/kali_apps/`) — installable via pip, described below.
+- **The optional web UI** (`app.py`, `templates/`) — a Flask frontend over the same scripts.
+
+Installing the CLI does **not** install or require the web UI. The two share one copy of
+each script (in `src/kali_apps/`) so they never drift out of sync.
+
+---
+
+## CLI toolkit
+
+Command-line genome analysis toolkit: k-mer hashing/distance matrices, restriction-fragment
+distance, distance trees, tensor-based clustering, genome downloading, k-mer spacing analysis,
+metadata preparation, and Robinson-Foulds tree comparison.
+
+This package exposes each script in the original `Kali_apps` bundle as a proper CLI command,
+installed system-wide (or into a virtualenv) via pip — no need to invoke `python script.py`
+or track file paths.
+
+## Install
+
+### Recommended: pipx (global commands, no activation ever needed)
+
+Install pipx first, then the package. Pick your platform:
+
+**macOS**
+```bash
+brew install pipx
+pipx ensurepath
+```
+
+**Linux — Debian/Ubuntu/Kali**
+```bash
+sudo apt update && sudo apt install pipx
+pipx ensurepath
+```
+
+**Linux — Fedora/RHEL**
+```bash
+sudo dnf install pipx
+pipx ensurepath
+```
+
+**Linux — Arch**
+```bash
+sudo pacman -S python-pipx
+pipx ensurepath
+```
+
+**Linux — no package-manager access (any distro fallback)**
+```bash
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath
+```
+
+**Windows (PowerShell)**
+```powershell
+python -m pip install --user pipx
+python -m pipx ensurepath
+```
+
+Close and reopen your terminal after `ensurepath` (this step updates your `PATH`). Then,
+from the folder containing `pyproject.toml`:
+
+```bash
+pipx install .
+```
+
+All eight commands (`pykali_hash`, `KALI_non-hash`, `KALI_hash`, `kali-tree`, `kali-tensor`,
+`kali-downloader`, `kali-prepare-metadata`, `kali-rf-distance`) are now available globally,
+in any terminal, with no activation step. To pick up changes after editing the scripts:
+
+```bash
+pipx install . --force
+```
+
+### Alternative: virtual environment
+
+If pipx isn't available (locked-down system, no admin rights):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install .
+```
+
+Commands work only while that venv is activated — you'll need to re-run the `source` /
+`activate` line in every new terminal session.
+
+For editable/development install (changes to the scripts take effect immediately, still
+inside a venv):
+
+```bash
+pip install -e .
+```
+
+## One-line install script
+
+Run `./install.sh` from this directory. It prefers pipx (installing globally, no
+activation needed) and automatically falls back to a local `.venv` if pipx isn't
+available and can't be installed automatically. Either way it prints the list of commands
+now available.
+
+## Commands installed
+
+| Command                  | Underlying script       | Purpose                                   |
+|---------------------------|--------------------------|--------------------------------------------|
+| `pykali_hash`             | `pykali_hash.py`          | k-mer hashing / distance matrices (formerly `hash.py`) |
+| `KALI_non-hash`           | `KALI_non_hash.py`        | In-silico restriction fragment distances (formerly `pykali.py`) |
+| `KALI_hash`               | `KALI_hash.py`            | k-mer spacing analysis (formerly `kali_spacing.py`) |
+| `kali-tree`               | `kali_tree.py`            | Build distance trees (Newick/dendrogram)   |
+| `kali-tensor`             | `kali_tensor.py`          | Tensor-based genome clustering             |
+| `kali-downloader`         | `kali_downloader.py`      | Download genomes + metadata                |
+| `kali-prepare-metadata`   | `prepare_metadata.py`     | Prepare metadata CSV for classifier training |
+| `kali-rf-distance`        | `rf_distance.py`          | Robinson-Foulds distance between trees     |
+
+Every command supports `-h` / `--help` for its own options, e.g.:
+
+```bash
+KALI_non-hash --help
+kali-tree -i genomes/ -o results/tree1 --png
+kali-rf-distance tree1.nwk tree2.nwk tree3.nwk
+```
+
+## Uninstall
+
+```bash
+pip uninstall kali-apps
+```
+
+---
+
+## Web UI (optional, separate from the CLI install)
+
+The Flask frontend runs the same scripts through a browser instead of a terminal.
+It lives right next to the CLI package in this same folder but is **not** part of what
+`pip install .` installs — you only get it if you ask for it:
+
+```bash
+pip install .[web]     # adds flask + gunicorn on top of the CLI deps
+python app.py
+open http://localhost:8080
+```
+
+Everything else (uploads/, outputs/, jobs.json, templates/) is created and used only by
+`app.py`; none of it is touched by the CLI install.

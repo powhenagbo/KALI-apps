@@ -1,0 +1,3776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KALI — Genome Distance Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0f14; --surface:#161a24; --card:#1c2133; --border:#2a3050;
+  --accent:#5b8df8; --teal:#1dc9a0; --purple:#9b72f8; --amber:#f5a623;
+  --red:#f05050; --text:#e2e8f8; --muted:#6b7a9e;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;}
+body{min-height:100vh;display:grid;grid-template-rows:auto 1fr;}
+header{border-bottom:1px solid var(--border);padding:0 2rem;display:flex;
+  align-items:center;gap:1.5rem;height:56px;background:var(--surface);}
+.logo{font-family:var(--mono);font-size:1.1rem;font-weight:500;color:var(--teal);}
+.logo span{color:var(--purple);}
+.tagline{font-size:12px;color:var(--muted);}
+.header-tabs{margin-left:auto;display:flex;gap:2px;flex-wrap:wrap;align-items:center;}
+.htab{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;
+  font-weight:500;color:var(--muted);background:transparent;border:none;transition:all 0.15s;}
+.htab:hover{color:var(--text);background:var(--card);}
+.htab.active{color:var(--accent);background:rgba(91,141,248,0.12);}
+main{display:grid;grid-template-columns:340px 1fr;gap:0;overflow:hidden;}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;height:calc(100vh - 56px);}
+.sidebar-section{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);}
+.sidebar-section:last-child{border-bottom:none;flex:1;}
+.section-title{font-family:var(--mono);font-size:10px;font-weight:500;
+  letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:0.9rem;}
+.script-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.script-btn{padding:10px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);cursor:pointer;text-align:center;transition:all 0.15s;color:var(--muted);}
+.script-btn:hover{border-color:var(--accent);color:var(--text);}
+.script-btn.active{border-color:var(--accent);background:rgba(91,141,248,0.1);color:var(--accent);}
+.script-btn .sb-name{font-family:var(--mono);font-size:11px;font-weight:500;}
+.script-btn .sb-desc{font-size:10px;margin-top:2px;color:var(--muted);}
+.drop-zone{border:1.5px dashed var(--border);border-radius:8px;padding:1.2rem 1rem;
+  text-align:center;cursor:pointer;transition:all 0.15s;color:var(--muted);}
+.drop-zone:hover,.drop-zone.over{border-color:var(--teal);color:var(--teal);background:rgba(29,201,160,0.05);}
+.drop-zone input{display:none;}
+.dz-icon{font-size:1.5rem;margin-bottom:0.3rem;}
+.dz-text{font-size:12px;}
+.dz-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+.file-list{margin-top:0.6rem;display:flex;flex-direction:column;gap:4px;}
+.file-item{display:flex;align-items:center;gap:8px;padding:6px 10px;
+  background:var(--card);border-radius:6px;border:1px solid var(--border);
+  font-family:var(--mono);font-size:11px;color:var(--text);}
+.file-item .fi-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+.file-item .fi-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-item .fi-rm{color:var(--muted);cursor:pointer;font-size:14px;line-height:1;
+  background:none;border:none;padding:0;transition:color 0.1s;}
+.file-item .fi-rm:hover{color:var(--red);}
+.clear-btn{width:100%;margin-top:6px;padding:6px;background:transparent;
+  border:1px solid var(--border);border-radius:6px;color:var(--muted);
+  font-size:11px;font-family:var(--mono);cursor:pointer;transition:all 0.12s;display:none;}
+.clear-btn:hover{border-color:var(--red);color:var(--red);background:rgba(240,80,80,0.06);}
+.divider{text-align:center;font-size:10px;color:var(--muted);margin:0.5rem 0;
+  display:flex;align-items:center;gap:8px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.folder-row{display:flex;gap:6px;}
+.folder-row input{flex:1;padding:7px 10px;background:var(--card);
+  border:1px solid var(--border);border-radius:6px;color:var(--text);
+  font-family:var(--mono);font-size:11px;}
+.folder-row input:focus{outline:none;border-color:var(--accent);}
+.folder-check{padding:6px 10px;background:var(--card);border:1px solid var(--border);
+  border-radius:6px;color:var(--muted);font-size:11px;cursor:pointer;white-space:nowrap;}
+.folder-check:hover{border-color:var(--teal);color:var(--teal);}
+.folder-status{font-size:10px;margin-top:4px;padding:4px 8px;border-radius:4px;
+  font-family:var(--mono);display:none;}
+.folder-status.ok{background:rgba(29,201,160,0.1);color:var(--teal);}
+.folder-status.err{background:rgba(240,80,80,0.1);color:var(--red);}
+.jobs-list{display:flex;flex-direction:column;gap:4px;}
+.job-item{display:flex;align-items:center;gap:8px;padding:6px 10px;
+  background:var(--card);border-radius:6px;border:1px solid var(--border);
+  font-family:var(--mono);font-size:10px;cursor:pointer;transition:border-color 0.1s;}
+.job-item:hover{border-color:var(--accent);}
+.job-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.job-dot.done{background:var(--teal);}
+.job-dot.running{background:var(--amber);}
+.job-dot.error{background:var(--red);}
+.job-dot.queued{background:var(--muted);}
+.job-id{color:var(--muted);}
+.job-info{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;}
+input[type="text"],select,textarea{width:100%;padding:7px 10px;background:var(--card);
+  border:1px solid var(--border);border-radius:6px;color:var(--text);
+  font-family:var(--mono);font-size:12px;}
+input[type="text"]:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+select option{background:var(--card);}
+.checkbox-row{display:flex;align-items:center;gap:8px;}
+.checkbox-row input[type="checkbox"]{width:14px;height:14px;accent-color:var(--accent);}
+.checkbox-row label{margin:0;font-size:12px;color:var(--text);}
+.field{margin-bottom:0.9rem;}
+.field:last-child{margin-bottom:0;}
+.pipeline-only{display:block;}
+.run-btn{width:100%;padding:11px;border-radius:8px;background:var(--accent);color:#fff;
+  font-family:var(--sans);font-size:13px;font-weight:600;border:none;cursor:pointer;
+  letter-spacing:0.02em;transition:opacity 0.15s,transform 0.1s;}
+.run-btn:hover{opacity:0.88;}
+.run-btn:active{transform:scale(0.98);}
+.run-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.content{display:flex;flex-direction:column;height:calc(100vh - 56px);overflow:hidden;}
+.view{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.view.active{display:flex;}
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:3rem;text-align:center;}
+.welcome-title{font-size:2rem;font-weight:300;color:var(--text);margin-bottom:0.5rem;}
+.welcome-title strong{font-weight:600;color:var(--teal);}
+.welcome-sub{font-size:13px;color:var(--muted);max-width:480px;line-height:1.7;}
+.welcome-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:2rem;
+  width:100%;max-width:520px;}
+.wcard{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:1.1rem 1.2rem;text-align:left;}
+.wcard-name{font-family:var(--mono);font-size:12px;color:var(--accent);
+  font-weight:500;margin-bottom:4px;}
+.wcard-desc{font-size:11px;color:var(--muted);line-height:1.6;}
+.log-view{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.log-header{padding:0.8rem 1.5rem;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;}
+.log-title{font-family:var(--mono);font-size:12px;color:var(--text);flex:1;}
+.badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;
+  font-family:var(--mono);letter-spacing:0.06em;}
+.badge-running{background:rgba(245,166,35,0.2);color:var(--amber);}
+.badge-done{background:rgba(29,201,160,0.2);color:var(--teal);}
+.badge-error{background:rgba(240,80,80,0.2);color:var(--red);}
+.badge-queued{background:rgba(107,122,158,0.2);color:var(--muted);}
+.log-body{flex:1;overflow-y:auto;padding:1rem 1.5rem;font-family:var(--mono);
+  font-size:11px;line-height:1.9;color:var(--muted);background:var(--bg);}
+.log-line.info{color:var(--text);}
+.log-line.success{color:var(--teal);}
+.log-line.timing{color:var(--amber);}
+.log-line.error{color:var(--red);}
+.log-line.header{color:var(--accent);font-weight:500;}
+.results-view{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.results-header{padding:0.8rem 1.5rem;background:var(--surface);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.results-title{font-family:var(--mono);font-size:12px;color:var(--text);flex:1;}
+.file-tabs{display:flex;gap:4px;flex-wrap:wrap;}
+.ftab{padding:4px 10px;border-radius:4px;cursor:pointer;font-family:var(--mono);
+  font-size:10px;font-weight:500;background:var(--card);border:1px solid var(--border);
+  color:var(--muted);transition:all 0.12s;}
+.ftab:hover{border-color:var(--accent);color:var(--text);}
+.ftab.active{border-color:var(--accent);background:rgba(91,141,248,0.12);color:var(--accent);}
+.ftab.html-tab{border-color:rgba(29,201,160,0.4);color:var(--teal);}
+.ftab.html-tab.active{background:rgba(29,201,160,0.12);}
+.action-btn{padding:5px 12px;background:transparent;border:1px solid var(--border);
+  border-radius:5px;color:var(--muted);font-size:11px;font-family:var(--mono);
+  cursor:pointer;transition:all 0.12s;}
+.action-btn:hover{border-color:var(--teal);color:var(--teal);}
+.action-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.tree-action-btn{padding:5px 12px;background:transparent;
+  border:1px solid var(--teal);border-radius:5px;color:var(--teal);
+  font-size:11px;font-family:var(--mono);cursor:pointer;transition:all 0.12s;}
+.tree-action-btn:hover{background:rgba(29,201,160,0.1);}
+.tree-action-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.results-body{flex:1;overflow:hidden;}
+.results-body iframe{width:100%;height:100%;border:none;background:#fff;}
+.progress-wrap{padding:0.6rem 1.5rem;background:var(--surface);border-top:1px solid var(--border);}
+.progress-bar-outer{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--teal),var(--accent));
+  width:0%;transition:width 0.4s;border-radius:2px;}
+.progress-label{font-size:10px;color:var(--muted);margin-top:4px;font-family:var(--mono);}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--card);
+  border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;
+  font-size:12px;color:var(--text);font-family:var(--mono);opacity:0;
+  transform:translateY(8px);transition:all 0.2s;pointer-events:none;z-index:999;max-width:320px;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{border-color:rgba(29,201,160,0.5);}
+.toast.error{border-color:rgba(240,80,80,0.5);}
+.classify-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.classify-title{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--accent);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.08em;}
+.model-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .12s;margin-bottom:6px;}
+.model-item:hover{border-color:var(--accent);}
+.model-item.selected{border-color:var(--accent);background:rgba(91,141,248,.08);}
+.model-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.model-item.selected .model-dot{background:var(--accent);}
+.model-name{font-family:var(--mono);font-size:11px;color:var(--text);flex:1;}
+.model-none{font-size:11px;color:var(--muted);padding:8px 0;}
+.classify-mode-btn{padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .12s;}
+.classify-mode-btn:hover{border-color:var(--accent);color:var(--text);}
+.classify-mode-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(91,141,248,.1);}
+.classify-btn{width:100%;padding:10px;border-radius:8px;background:var(--purple);color:#fff;font-family:var(--sans);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;margin-top:.5rem;}
+.classify-btn:hover{opacity:.88;}
+.classify-btn:disabled{opacity:.4;cursor:not-allowed;}
+.train-section{border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem;}
+.train-btn{width:100%;padding:9px;border-radius:8px;background:transparent;border:1px solid var(--teal);color:var(--teal);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;}
+.train-btn:hover{background:rgba(29,201,160,.08);}
+.hgt-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.hgt-title{font-family:var(--mono);font-size:11px;font-weight:500;color:#f5a623;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.08em;}
+.hgt-btn{width:100%;padding:10px;border-radius:8px;background:#f5a623;color:#412402;font-family:var(--sans);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;margin-top:.5rem;}
+.hgt-btn:hover{opacity:.88;}
+.hgt-btn:disabled{opacity:.4;cursor:not-allowed;}
+.param-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.hgt-stat{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:6px;padding:6px 10px;font-family:var(--mono);font-size:11px;color:#f5a623;margin-top:4px;}
+.tensor-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.tensor-title{font-family:var(--mono);font-size:11px;font-weight:500;color:#9b72f8;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.08em;}
+.tensor-btn{width:100%;padding:10px;border-radius:8px;background:#534AB7;color:#CECBF6;font-family:var(--sans);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;margin-top:.5rem;}
+.tensor-btn:hover{opacity:.88;}
+.tensor-btn:disabled{opacity:.4;cursor:not-allowed;}
+.outbreak-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.outbreak-title{font-family:var(--mono);font-size:11px;font-weight:500;color:#f05050;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.08em;}
+.outbreak-btn{width:100%;padding:10px;border-radius:8px;background:#993C1D;color:#F5C4B3;font-family:var(--sans);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;margin-top:.5rem;}
+.outbreak-btn:hover{opacity:.88;}
+.outbreak-btn:disabled{opacity:.4;cursor:not-allowed;}
+.dl-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.dl-title{font-family:var(--mono);font-size:11px;font-weight:500;color:#1dc9a0;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.08em;}
+.dl-btn{width:100%;padding:10px;border-radius:8px;background:#0F6E56;color:#9FE1CB;font-family:var(--sans);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;margin-top:.5rem;}
+.dl-btn:hover{opacity:.88;}
+.dl-btn:disabled{opacity:.4;cursor:not-allowed;}
+.mash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.mash-title{font-family:var(--mono);font-size:11px;font-weight:500;color:#f5a623;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.08em;}
+.mash-btn{width:100%;padding:10px;border-radius:8px;background:#7A5200;color:#FFDFA0;font-family:var(--sans);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s;margin-top:.5rem;}
+.mash-btn:hover{opacity:.88;}
+.mash-btn:disabled{opacity:.4;cursor:not-allowed;}
+.mash-result-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;}
+.mash-r{font-size:1.1rem;font-weight:600;min-width:60px;}
+.db-toggle{display:flex;gap:6px;margin-bottom:.75rem;}
+.db-btn{padding:5px 14px;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .12s;}
+.db-btn:hover{border-color:#1dc9a0;color:#1dc9a0;}
+.db-btn.active{border-color:#1dc9a0;color:#1dc9a0;background:rgba(29,201,160,.1);}
+.example-chip{display:inline-bin;padding:3px 9px;border-radius:12px;font-size:10px;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;margin:2px;transition:all .12s;font-family:var(--mono);}
+.example-chip:hover{border-color:#1dc9a0;color:#1dc9a0;}
+.pulse-dot{display:inline-bin;width:7px;height:7px;border-radius:50%;background:#f05050;margin-right:5px;animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* ── AI panel ── */
+.ai-panel{background:#0F1A2E;border:1px solid #1dc9a0;border-radius:10px;
+  padding:1rem 1.25rem;margin-top:1rem;}
+.ai-panel-title{font-size:11px;font-weight:600;color:#1dc9a0;text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:.75rem;display:flex;align-items:center;gap:6px;}
+.ai-input-row{display:flex;gap:8px;margin-bottom:.6rem;}
+.ai-key-input{flex:1;height:32px;border:1px solid #1dc9a0;border-radius:6px;
+  padding:0 10px;font-size:12px;font-family:var(--mono);background:#060E1A;
+  color:#1dc9a0;}
+.ai-model-select{height:32px;border:1px solid var(--border);border-radius:6px;
+  padding:0 8px;font-size:11px;background:var(--card);color:var(--text);}
+.ai-run-btn{padding:0 14px;height:32px;border-radius:6px;background:#1dc9a0;
+  color:#060E1A;font-size:12px;font-weight:600;border:none;cursor:pointer;
+  white-space:nowrap;}
+.ai-run-btn:hover{background:#15a882;}
+.ai-run-btn:disabled{opacity:.5;cursor:not-allowed;}
+.ai-output{font-size:12px;line-height:1.7;color:#c8d8f0;white-space:pre-wrap;
+  font-family:var(--font,Arial);margin-top:.5rem;min-height:40px;}
+.ai-model-tag{font-size:10px;color:var(--muted);margin-top:.4rem;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">KALI<span>.bio</span></div>
+  <div class="tagline">In silico genome distance analysis</div>
+  <div class="header-tabs">
+    <button class="htab active" id="htab-home" onclick="showView('welcome')">Home</button>
+    <button class="htab" id="htab-log" onclick="showView('log')">Log</button>
+    <button class="htab" id="htab-classify" onclick="showView('classify')">Classify</button>
+    <button class="htab" id="htab-hgt"      onclick="showView('hgt')">HGT</button>
+    <button class="htab" id="htab-tensor"   onclick="showView('tensor')">Tensor</button>
+    <button class="htab" id="htab-outbreak" onclick="showView('outbreak')">Outbreak</button>
+    <button class="htab" id="htab-download" onclick="showView('download')">Download</button>
+    <button class="htab" id="htab-mash"     onclick="showView('mash')">MASH</button>
+    <button class="htab" id="htab-benchmark" onclick="showView('benchmark')" title="Compare KALI vs Kraken2">Benchmark</button>
+    <button class="htab" id="htab-rfdist"   onclick="showView('rfdist')" title="Robinson-Foulds tree distance">RF Distance</button>
+    <button class="htab" id="htab-results"  onclick="showView('results')">Results</button>
+    
+</header>
+<main>
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="section-title">Alignment_free menu</div>
+      <div class="script-toggle">
+        <div class="script-btn active" id="btn-hash" onclick="selectScript('hash')">
+          <div class="sb-name">Hash</div>
+          <div class="sb-desc">k-mer frequency</div>
+        </div>
+        <div class="script-btn" id="btn-KALI_non-hash" onclick="selectScript('KALI_non-hash')">
+          <div class="sb-name">KALI_Non-hash</div>
+          <div class="sb-desc">restriction enzyme (RE)</div>
+        </div>
+        <div class="script-btn" id="btn-KALI_hash" onclick="selectScript('KALI_hash')">
+          <div class="sb-name">KALI_hash</div>
+          <div class="sb-desc">k-mer KALI_hash distribution</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-title">Genome files</div>
+      <div class="drop-zone" id="drop-zone"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="handleDrop(event)">
+        <input type="file" id="file-input" multiple
+               accept=".fasta,.fa,.fna,.fas,.ffn,.fastq,.fq,.gz"
+               onchange="handleFiles(this.files)">
+        <div class="dz-icon">&#x2B06;</div>
+        <div class="dz-text">Upload genome files</div>
+        <div class="dz-sub">.fasta .fa .fna .fastq .gz</div>
+      </div>
+      <div class="file-list" id="file-list"></div>
+      <button class="clear-btn" id="clear-btn" onclick="clearUploads()">Clear all uploaded files</button>
+      <div class="divider">or use local folder</div>
+      <div>
+        <div class="folder-row">
+          <input type="text" id="folder-path" placeholder="/path/to/genomes" />
+          <button class="folder-check" onclick="validateFolder()">Check</button>
+        </div>
+        <div class="folder-status" id="folder-status"></div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;">
+        Past jobs
+        <span onclick="document.getElementById('jobs-list').innerHTML='<div style=\'font-size:11px;color:var(--muted);\'>No jobs yet</div>';" style="font-size:10px;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:.05em;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Clear</span>
+      </div>
+      <div class="jobs-list" id="jobs-list">
+        <div style="font-size:11px;color:var(--muted);">No jobs yet</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-title">Parameters</div>
+      <div class="field">
+        <label>k-mer sizes</label>
+        <input type="text" id="param-k" value="3 4 5" placeholder="e.g. 3 4 5" />
+      </div>
+      <div class="field" id="field-bins">
+        <label id="label-bins">Bin size</label>
+        <input type="text" id="param-bins" value="50" />
+      </div>
+      <div class="field KALI_hash-only" id="field-KALI_hash-bins" style="display:none;">
+        <label>KALI_hash bins</label>
+        <input type="number" id="param-KALI_hash-bins" value="200" min="1">
+      </div>
+      <div class="field">
+        <label>Distance metric</label>
+        <select id="param-metric">
+          <option value="cosine" selected>cosine</option>
+          <option value="euclidean">euclidean</option>
+          <option value="jaccard">jaccard</option>
+        </select>
+      </div>
+      <div class="field" id="field-mode">
+        <label>Mode</label>
+        <select id="param-mode">
+          <option value="genome" selected>genome</option>
+          <option value="metagenomics">metagenomics</option>
+        </select>
+      </div>
+      <div class="field" id="field-reduce">
+        <label>Reduction method</label>
+        <select id="param-reduce">
+          <option value="mean" selected>mean</option>
+          <option value="median">median</option>
+        </select>
+      </div>
+      <div class="checkbox-row" style="margin-bottom:0.9rem;">
+        <input type="checkbox" id="param-combine">
+        <label for="param-combine">Combine all k into one matrix</label>
+      </div>
+      <div class="checkbox-row KALI_non-hash-only" id="field-plot" style="margin-bottom:0.9rem;">
+        <input type="checkbox" id="param-plot">
+        <label for="param-plot">Save electrophoresis band plot (PNG)</label>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <button class="run-btn" id="run-btn" onclick="runAnalysis()" disabled>Upload files to run</button>
+    </div>
+  </aside>
+  <div class="content">
+    <div class="view active" id="view-welcome">
+      <div class="welcome">
+        <div class="welcome-title">Welcome to <strong>KALI</strong></div>
+        <div class="welcome-sub">Upload genome FASTA files, choose a Model and parameters, then click Run.</div>
+        <div class="welcome-cards">
+          <div class="wcard">
+            <div class="wcard-name">Hash (k-mer frequency)</div>
+            <div class="wcard-desc">k-mer frequency bins. Fast, supports metagenomics.</div>
+          </div>
+          <div class="wcard">
+            <div class="wcard-name">KALI_Non-hash(restriction digest)</div>
+            <div class="wcard-desc">In silico restriction mapping using biological enzyme recognition sites (EcoRI, HindIII, BamHI etc). Produces genuinely orthogonal distances to Hash.</div>
+          </div>
+          <div class="wcard">
+            <div class="wcard-name">Tensor Fusion</div>
+            <div class="wcard-desc">Conbime different k=3 4 5 simultaneously. Combine into one matrix.</div>
+          </div>
+          <div class="wcard">
+            <div class="wcard-name">KALI_hash(k-mer distribution)</div>
+            <div class="wcard-desc">Captures how k-mers are spatially distributed across the genome. Matches KALI_non-hash at r&nbsp;&gt;&nbsp;0.975, at hash.py speed.</div>
+          </div>
+          <div class="wcard">
+            <div class="wcard-name">Build tree</div>
+            <div class="wcard-desc">One click builds an interactive D3 phylogenetic tree.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="view" id="view-log">
+      <div class="log-view">
+        <div class="log-header">
+          <div class="log-title" id="log-title">Ready</div>
+          <div class="badge badge-queued" id="log-badge">IDLE</div>
+        </div>
+        <div class="log-body" id="log-body">
+          <div class="log-line" style="color:var(--muted);">Waiting for job…</div>
+        </div>
+        <div class="progress-wrap" id="progress-wrap" style="display:none;">
+          <div class="progress-bar-outer">
+            <div class="progress-bar-inner" id="progress-bar"></div>
+          </div>
+          <div class="progress-label" id="progress-label">Processing…</div>
+        </div>
+      </div>
+    </div>
+    <div class="view" id="view-results">
+      <div style="display:grid;grid-template-columns:1fr 340px;height:calc(100vh - 56px);gap:0;">
+
+        <!-- Left — file browser + preview -->
+        <div style="display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);">
+          <div class="results-header" style="flex-shrink:0;">
+            <div class="results-title">Output files</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <div class="file-tabs" id="file-tabs"></div>
+              <button class="action-btn" id="dl-btn" onclick="downloadCurrent()"
+                      style="display:none;">⬇ Download</button>
+              <button id="mantel-btn" onclick="runMantelPlot()"
+                      style="display:none;padding:4px 10px;border-radius:6px;
+                             border:1px solid #f5a623;background:transparent;
+                             color:#f5a623;font-size:11px;cursor:pointer;
+                             white-space:nowrap;">📊 Plot Mantel</button>
+              <button onclick="showAIPanel()" title="Interpret with AI"
+                      style="padding:4px 10px;border-radius:6px;border:1px solid #1dc9a0;
+                             background:transparent;color:#1dc9a0;font-size:11px;
+                             cursor:pointer;white-space:nowrap;">🤖 Interpret</button>
+            </div>
+          </div>
+          <div class="results-body" id="results-body" style="flex:1;overflow:auto;">
+            <div style="display:flex;align-items:center;justify-content:center;
+                        height:100%;color:var(--muted);font-size:13px;">
+              No results yet — run an analysis first
+            </div>
+          </div>
+        </div>
+
+        <!-- Right — Phylogenetic tree panel -->
+        <div style="display:flex;flex-direction:column;overflow-y:auto;padding:1rem;background:var(--surface);">
+          <div style="font-size:11px;font-weight:600;color:#9b72f8;text-transform:uppercase;
+                      letter-spacing:.08em;margin-bottom:.75rem;">🌲 Phylogenetic Tree</div>
+
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;line-height:1.5;">
+            Select a distance matrix CSV from the file tabs, or upload one directly from your hard drive.
+          </div>
+
+          <!-- Upload CSV from hard drive -->
+          <div style="margin-bottom:.75rem;">
+            <div id="tree-csv-dropzone"
+                 onclick="document.getElementById('tree-csv-input').click()"
+                 ondragover="event.preventDefault();this.style.borderColor='var(--teal)';this.style.color='var(--teal)';"
+                 ondragleave="this.style.borderColor='';this.style.color='';"
+                 ondrop="handleTreeCsvDrop(event)"
+                 style="border:1.5px dashed var(--border);border-radius:7px;padding:.7rem;
+                        text-align:center;cursor:pointer;transition:all .15s;color:var(--muted);
+                        font-size:11px;font-family:var(--mono);">
+              <input type="file" id="tree-csv-input" accept=".csv" style="display:none;"
+                     onchange="uploadTreeCsv(this.files)">
+              ⬆ Upload CSV from hard drive
+            </div>
+            <div id="tree-csv-upload-status"
+                 style="font-size:10px;font-family:var(--mono);margin-top:3px;display:none;"></div>
+          </div>
+
+          <!-- Selected matrix -->
+          <div class="field" style="margin-bottom:.6rem;">
+            <label style="font-size:11px;">Distance matrix</label>
+            <div id="tree-csv-name"
+                 style="font-size:11px;font-family:var(--mono);color:#9b72f8;
+                        padding:5px 8px;background:var(--card);border:1px solid var(--border);
+                        border-radius:5px;min-height:28px;">
+              No CSV selected — click a .csv file tab
+            </div>
+          </div>
+
+          <!-- Metadata file -->
+          <div class="field" style="margin-bottom:.6rem;">
+            <label style="font-size:11px;">Metadata file (optional)</label>
+            <input type="text" id="tree-meta-file"
+                   placeholder="/path/to/metadata.xlsx or labels.csv"
+                   style="font-size:11px;font-family:var(--mono);width:100%;" />
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">
+              Labels nodes with Organism name and colours by Genus
+            </div>
+          </div>
+
+          <!-- Colour tips by -->
+          <div class="field" style="margin-bottom:.6rem;">
+            <label style="font-size:11px;">Colour tips by</label>
+            <select id="tree-group-col"
+                    style="font-size:12px;width:100%;height:30px;
+                           border:1px solid var(--border);border-radius:5px;
+                           background:var(--card);color:var(--text);">
+              <option value="">— none —</option>
+              <option value="Genus" selected>Genus</option>
+              <option value="Family">Family</option>
+              <option value="Host">Host</option>
+              <option value="Country">Country</option>
+            </select>
+          </div>
+
+          <!-- Tree method -->
+          <div class="field" style="margin-bottom:.6rem;">
+            <label style="font-size:11px;">Tree method</label>
+            <select id="tree-method"
+                    style="font-size:12px;width:100%;height:30px;
+                           border:1px solid var(--border);border-radius:5px;
+                           background:var(--card);color:var(--text);">
+              <option value="upgma">UPGMA (ultrametric)</option>
+              <option value="nj">Neighbour-Joining</option>
+              <option value="ward">Ward linkage</option>
+              <option value="complete">Complete linkage</option>
+              <option value="average">Average linkage</option>
+            </select>
+          </div>
+
+          <!-- Build button -->
+          <button id="tree-btn" onclick="buildTree()"
+                  style="width:100%;height:36px;border-radius:6px;border:none;
+                         background:#9b72f8;color:#fff;font-size:13px;font-weight:500;
+                         cursor:pointer;margin-bottom:.6rem;"
+                  disabled>
+            ▲ Build tree
+          </button>
+
+          <span id="tree-status"
+                style="font-size:11px;color:var(--muted);font-family:var(--mono);
+                       text-align:center;display:block;"></span>
+
+          <!-- Divider -->
+          <div style="border-top:1px solid var(--border);margin:.75rem 0;"></div>
+
+          <!-- Tips -->
+          <div style="font-size:10px;color:var(--muted);line-height:1.6;">
+            <div style="font-weight:600;margin-bottom:4px;">Tips</div>
+            <div>• UPGMA — best for virus families with molecular clock</div>
+            <div>• NJ — best for bacteria, unequal evolution rates</div>
+            <div>• Metadata must have Accession + Genus or Organism columns</div>
+            <div>• Use labels_fixed.csv from the Classify tab</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Groq AI Chat Panel -->
+    <div class="ai-panel" id="ai-panel" style="display:none;margin:0 1rem 1rem;">
+      <div class="ai-panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>🤖 KALI-AI — Groq (free) | remembers your conversations</span>
+        <button onclick="toggleAIPanel()" id="ai-minimize-btn"
+          style="background:transparent;border:1px solid #1dc9a0;border-radius:4px;
+          color:#1dc9a0;font-size:11px;cursor:pointer;padding:2px 8px;">− Minimise</button>
+      </div>
+      <div id="ai-panel-body">
+
+      <!-- Settings row -->
+      <div class="ai-input-row" style="margin-bottom:.5rem;flex-wrap:wrap;gap:6px;">
+
+        <!-- Backend toggle -->
+        <select id="ai-backend" class="ai-model-select"
+                style="height:32px;font-size:11px;"
+                onchange="toggleAIBackend()">
+          <option value="openrouter">OpenRouter (free models)</option>
+          <option value="gemini">Google Gemini (free)</option>
+          <option value="mistral">Mistral (free tier)</option>
+          <option value="groq">Groq (blocked on some networks)</option>
+          <option value="ollama">🖥 Ollama (local — no key)</option>
+        </select>
+
+        <!-- Groq panel -->
+        <div id="groq-settings" style="display:flex;gap:6px;flex:1;align-items:center;min-width:200px;">
+          <input type="password" class="ai-key-input" id="groq-api-key"
+                 placeholder="API key for selected backend"
+                 style="flex:1;" oninput="scheduleKeySave()" />
+          <span id="key-saved-tag"
+                style="font-size:10px;color:#1dc9a0;white-space:nowrap;display:none;">✓ saved</span>
+          <select class="ai-model-select" id="groq-model" style="height:32px;"
+                  onchange="void(0)">
+            <!-- OpenRouter free models -->
+            <optgroup label="OpenRouter (free)">
+              <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (free)</option>
+              <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B (free)</option>
+              <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (free)</option>
+              <option value="google/gemma-2-9b-it:free">Gemma 2 9B (free)</option>
+              <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (free)</option>
+              <option value="deepseek/deepseek-r1:free">DeepSeek R1 (free)</option>
+            </optgroup>
+            <!-- Gemini models -->
+            <optgroup label="Google Gemini">
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash (free)</option>
+              <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+            </optgroup>
+            <!-- Mistral models -->
+            <optgroup label="Mistral">
+              <option value="mistral-small-latest">Mistral Small (free tier)</option>
+              <option value="open-mistral-7b">Mistral 7B (free tier)</option>
+            </optgroup>
+            <!-- Groq models -->
+            <optgroup label="Groq">
+              <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+              <option value="llama-3.1-8b-instant">Llama 3.1 8B</option>
+              <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- Ollama panel -->
+        <div id="ollama-settings" style="display:none;gap:6px;flex:1;align-items:center;">
+          <input type="text" class="ai-key-input" id="ollama-model"
+                 placeholder="Model: llama3, mistral, phi3..."
+                 style="flex:1;" value="llama3" />
+          <span style="font-size:10px;color:#1dc9a0;white-space:nowrap;">No key needed</span>
+        </div>
+
+      </div>
+
+      <!-- Past conversations -->
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:.5rem;">
+        <select id="ai-conv-select" style="flex:1;height:28px;border:1px solid var(--border);
+          border-radius:5px;font-size:11px;font-family:var(--mono);background:var(--card);color:var(--text);"
+          onchange="loadConversation(this.value)">
+          <option value="">── New conversation ──</option>
+        </select>
+        <button onclick="loadConversations()"
+          style="padding:0 8px;height:28px;border-radius:5px;border:1px solid var(--border);
+          background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">↻</button>
+        <button onclick="deleteConversation()"
+          style="padding:0 8px;height:28px;border-radius:5px;border:1px solid var(--border);
+          background:transparent;color:#f05050;font-size:11px;cursor:pointer;">✕ Delete</button>
+      </div>
+
+      <!-- Chat messages -->
+      <div id="ai-chat-box" style="height:280px;overflow-y:auto;background:#060E1A;
+        border:1px solid #1a2540;border-radius:8px;padding:.75rem;margin-bottom:.5rem;
+        font-size:12px;line-height:1.7;font-family:var(--font,Arial);">
+        <div style="color:#4a5580;font-size:11px;">
+          Select a result file in the Results tab → click 🤖 Interpret → start chatting.
+          All conversations are saved and remembered.
+        </div>
+      </div>
+
+      <!-- Chat input -->
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="ai-user-input"
+               placeholder="Ask a follow-up question about your results..."
+               style="flex:1;height:34px;border:1px solid #1dc9a0;border-radius:6px;
+               padding:0 10px;font-size:12px;background:#060E1A;color:#c8d8f0;"
+               onkeydown="if(event.key==='Enter')sendAIMessage();" />
+        <button class="ai-run-btn" id="ai-run-btn" onclick="sendAIMessage()">Send</button>
+      </div>
+      <div class="ai-model-tag" id="ai-model-tag" style="margin-top:4px;"></div>
+      </div><!-- end ai-panel-body -->
+    </div>
+
+    <!-- Classify view -->
+    <div class="view" id="view-classify">
+      <div style="padding:1.5rem;overflow-y:auto;height:calc(100vh - 56px);">
+
+        <div class="classify-card">
+          <div class="classify-title" style="color:#1dc9a0;">0 — Prepare metadata (NCBI downloads only)</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;">
+            NCBI metadata has empty Genus/Family columns. This step fixes that automatically
+            before training. Skip if your metadata already has labels.
+          </div>
+          <div class="field">
+            <label>Metadata file(s) — Excel or CSV from KALI downloader</label>
+            <input type="text" id="prep-meta-input"
+                   placeholder="/path/to/eco_shi_merged_metadata.xlsx"
+                   style="font-size:11px;margin-bottom:4px;" />
+          </div>
+          <div class="param-grid">
+            <div class="field">
+              <label>Label column</label>
+              <select id="prep-label-col" style="font-size:12px;">
+                <option value="Genus">Genus (recommended)</option>
+                <option value="Organism">Organism (full species name)</option>
+                <option value="Family">Family</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Min sequence length (bp)</label>
+              <input type="number" id="prep-min-length" value="100000" style="font-size:12px;" />
+            </div>
+          </div>
+          <button class="classify-btn"
+                  style="background:#0F6E56;color:#9FE1CB;margin-top:.5rem;"
+                  onclick="runPrepareMetadata()">
+            Fix metadata + generate labels CSV
+          </button>
+          <div id="prep-meta-status" style="font-size:11px;color:var(--teal);font-family:var(--mono);margin-top:4px;display:none;"></div>
+        </div>
+
+        <div class="classify-card">
+          <div class="classify-title">1 — Select model</div>
+          <div id="model-list"><div class="model-none">No models found — train one below</div></div>
+          <button style="margin-top:8px;font-size:11px;font-family:var(--mono);padding:5px 10px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;" onclick="refreshModels()">Refresh models</button>
+        </div>
+
+        <div class="classify-card">
+          <div class="classify-title">2 — Input sequences</div>
+
+          <div style="display:flex;gap:6px;margin-bottom:1rem;">
+            <button class="classify-mode-btn active" id="mode-single" onclick="setClassifyMode('single')">Single file</button>
+            <button class="classify-mode-btn" id="mode-folder" onclick="setClassifyMode('folder')">Folder</button>
+            <button class="classify-mode-btn" id="mode-uploaded" onclick="setClassifyMode('uploaded')">Uploaded files</button>
+          </div>
+
+          <div id="classify-input-single">
+            <label>FASTA file path</label>
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <input type="text" id="classify-single-path"
+                     placeholder="/path/to/cleaned_KC410872.fasta"
+                     style="flex:1;font-size:12px;"
+                     oninput="updateClassifySummary()" />
+              <label class="folder-check" for="classify-file-browse" style="cursor:pointer;">Browse</label>
+              <input type="file" id="classify-file-browse" accept=".fasta,.fa,.fna,.fas,.ffn,.fastq,.fq"
+                     style="display:none;" onchange="handleClassifySingleBrowse(this)" />
+            </div>
+            <div id="classify-single-status" class="folder-status"></div>
+          </div>
+
+          <div id="classify-input-folder" style="display:none;">
+            <label>Folder path</label>
+            <div style="display:flex;gap:6px;">
+              <input type="text" id="classify-folder"
+                     placeholder="/path/to/unknown/genomes"
+                     style="flex:1;font-size:12px;" />
+              <button class="folder-check" onclick="validateClassifyFolder()">Check</button>
+            </div>
+            <div class="folder-status" id="classify-folder-status"></div>
+          </div>
+
+          <div id="classify-input-uploaded" style="display:none;">
+            <div id="classify-upload-info" style="font-size:11px;color:var(--muted);font-family:var(--mono);">
+              No files uploaded yet
+            </div>
+          </div>
+        </div>
+
+        <div class="classify-card">
+          <div class="classify-title">3 — Run</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;" id="classify-summary">
+            Select a model and input to continue
+          </div>
+          <button class="classify-btn" id="classify-btn" onclick="runClassify()" disabled>
+            Classify sequences
+          </button>
+        </div>
+
+        <div class="classify-card">
+          <div class="classify-title">Train a new model</div>
+          <div class="field">
+            <label>Genome folder</label>
+            <input type="text" id="train-folder" placeholder="/path/to/labelled/genomes" />
+          </div>
+          <div class="field">
+            <label>Metadata CSV filename (must be uploaded)</label>
+            <input type="text" id="train-meta" placeholder="virusannotation.csv" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field">
+              <label>Accession column</label>
+              <input type="text" id="train-acc-col" value="Accession" />
+            </div>
+            <div class="field">
+              <label>Label column</label>
+              <input type="text" id="train-label-col" value="Group" />
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field">
+              <label>File pattern</label>
+              <input type="text" id="train-pattern" value="cleaned_{accession}.fasta" />
+            </div>
+            <div class="field">
+              <label>Model name (saved as models/NAME_model.pkl)</label>
+              <input type="text" id="train-model-name" placeholder="my_classifier" />
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:.25rem;">
+            <div class="field">
+              <label style="font-size:11px;">k-mer sizes</label>
+              <input type="text" id="train-k" value="3 4 5" style="font-size:12px;" />
+            </div>
+            <div class="field">
+              <label style="font-size:11px;">Bins (hash buckets)</label>
+              <input type="number" id="train-bins" value="50" min="10" max="500"
+                     style="font-size:12px;" />
+            </div>
+            <div class="field">
+              <label style="font-size:11px;">Feature mode</label>
+              <select id="train-feature-mode" style="font-size:11px;height:34px;width:100%;
+                border:1px solid var(--border);border-radius:5px;background:var(--card);color:var(--text);">
+                <option value="hashed" selected>Hashed — KALI hash bins (default)</option>
+                <option value="raw">Raw — full k-mer frequency (4^k)</option>
+                <option value="hybrid">Hybrid — hashed + raw combined</option>
+                <option value="KALI_hash">KALI_hash — gap distribution (r≥0.999 vs KALI_non-hash)</option>
+                <option value="KALI_hash_hybrid">KALI_hash + Hashed — richest signal</option>
+              </select>
+            </div>
+            <div class="field" id="train-KALI_hash-bins-field" style="display:none;">
+              <label style="font-size:11px;">KALI_hash bins per k-mer</label>
+              <select id="train-KALI_hash-bins" style="font-size:11px;height:34px;width:100%;
+                border:1px solid var(--border);border-radius:5px;background:var(--card);color:var(--text);"
+                title="More bins = closer to KALI_non-hash signal. 50 is fast, 200 is accurate.">
+                <option value="20">20 — fast,  r≈0.975 vs KALI_non-hash</option>
+                <option value="50" selected>50 — r≈0.985 vs KALI_non-hash</option>
+                <option value="100">100 — r≈0.996 vs KALI_non-hash</option>
+                <option value="200">200 — r≈0.9996 vs KALI_non-hash</option>
+                <option value="1000">1000 — r≈0.9999 (slowest)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label style="font-size:11px;">Trees</label>
+              <input type="number" id="train-trees" value="500" min="100" max="2000"
+                     style="font-size:12px;" />
+            </div>
+          </div>
+          <div style="font-size:10px;color:#1dc9a0;margin:.4rem 0 .6rem;font-family:var(--mono);">
+            Hashed mode uses the same KALI hash.py fingerprinting as the distance pipeline — more consistent results
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.25rem;">
+            <button class="train-btn" onclick="runTrain('evaluate')">Evaluate (CV + holdout split)</button>
+            <button class="train-btn" onclick="runTrain('train')">Train and save model</button>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:.4rem;font-family:var(--mono);">
+            Evaluate uses a 60/40 stratified train/holdout split (random_state=42).
+            CV runs only on the train set. Final accuracy is reported on the truly held-out set.
+            Split accessions are saved to outputs/splits/ for reviewer reproducibility.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- HGT view -->
+    <div class="view" id="view-hgt">
+      <div style="padding:1.5rem;overflow-y:auto;height:calc(100vh - 56px);">
+
+        <div class="hgt-card">
+          <div class="hgt-title">Input genomes</div>
+          <div style="margin-bottom:.75rem;">
+            <label>Local folder or single FASTA path</label>
+            <div style="display:flex;gap:6px;">
+              <input type="text" id="hgt-folder" placeholder="/path/to/genomes or single.fasta"
+                     style="flex:1;" oninput="updateHgtSummary()" />
+              <button class="folder-check" onclick="validateHgtFolder()">Check</button>
+            </div>
+            <div class="folder-status" id="hgt-folder-status"></div>
+          </div>
+          <div class="divider">or use already-uploaded files</div>
+          <div id="hgt-upload-info" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:4px;">
+            No files uploaded yet
+          </div>
+          <div style="margin-top:.75rem;">
+            <label>Organism(s) <span style="color:var(--muted);font-size:10px;">(AMR detection runs for each checked organism — results are merged)</span></label>
+            <div id="hgt-organism-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-top:6px;font-size:12px;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="Escherichia" checked onchange="updateHgtSummary()"> Escherichia
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="Klebsiella" onchange="updateHgtSummary()"> Klebsiella
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="Salmonella" onchange="updateHgtSummary()"> Salmonella
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="Staphylococcus_aureus" onchange="updateHgtSummary()"> S. aureus
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="Enterococcus_faecalis" onchange="updateHgtSummary()"> E. faecalis
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="Enterococcus_faecium" onchange="updateHgtSummary()"> E. faecium
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="Campylobacter" onchange="updateHgtSummary()"> Campylobacter
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="Clostridioides_difficile" onchange="updateHgtSummary()"> C. difficile
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="Acinetobacter_baumannii" onchange="updateHgtSummary()"> A. baumannii
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" name="hgt-org" value="" onchange="updateHgtSummary()"> Generic (no organism)
+              </label>
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px;">
+              AMR genes are detected automatically if AMRFinderPlus is installed and overlaid on the genome map.
+            </div>
+          </div>
+        </div>
+
+        <div class="hgt-card">
+          <div class="hgt-title">Parameters</div>
+          <div class="param-grid">
+            <div class="field">
+              <label>k-mer sizes</label>
+              <input type="text" id="hgt-k" value="3 4" />
+            </div>
+            <div class="field">
+              <label>Bin size (bp)</label>
+              <input type="text" id="hgt-bin" value="5000" />
+            </div>
+            <div class="field">
+              <label>Z-score threshold</label>
+              <input type="text" id="hgt-z" value="2.5"
+                     title="Higher = fewer but stronger islands. Try 2.0 for more sensitivity." />
+            </div>
+            <div class="field">
+              <label>Min island size (bp)</label>
+              <input type="text" id="hgt-min" value="5000" />
+            </div>
+          </div>
+          <div class="hgt-stat" id="hgt-param-info">
+            z=2.5 catches ~2% of bins by chance | lower z = more sensitive
+          </div>
+          <div style="margin-top:.75rem;">
+            <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:6px;">Quick presets</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="browse-btn" onclick="setHgtPreset('virus')" style="font-size:10px;">RNA virus (9-12 kb)</button>
+              <button class="browse-btn" onclick="setHgtPreset('bacteria')" style="font-size:10px;">Bacteria (1-7 Mb)</button>
+              <button class="browse-btn" onclick="setHgtPreset('large')" style="font-size:10px;">Large virus (50-200 kb)</button>
+            </div>
+          </div>
+          <div style="margin-top:.75rem;">
+            <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">AMR genes track <span style="color:#6b7a9e">(optional)</span></label>
+            <input type="text" id="hgt-amr-path"
+              placeholder="/path/to/all_genomes_amr.tsv"
+              style="width:100%;font-size:11px;padding:5px 8px;background:var(--bg2,#1c2133);
+                     border:1px solid var(--border,#2a3050);border-radius:4px;color:var(--text,#e2e8f8);" />
+            <div style="font-size:10px;color:#6b7a9e;margin-top:3px;">
+              AMRFinderPlus TSV — overlays HGT (red) and clonal (blue) gene markers on genome map
+            </div>
+          </div>
+        </div>
+
+        <div class="hgt-card">
+          <div class="hgt-title">Run detection</div>
+          <div class="checkbox-row" style="margin-bottom:.75rem;">
+            <input type="checkbox" id="hgt-summary-check" checked>
+            <label for="hgt-summary-check" style="font-size:12px;color:var(--text);">
+              Generate batch summary (compare hotspots across all genomes)
+            </label>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;" id="hgt-summary">
+            Enter a genome path or upload files to continue
+          </div>
+          <button class="hgt-btn" id="hgt-btn" onclick="runHgt()" disabled>
+            Detect genomic islands
+          </button>
+        </div>
+
+        <div class="hgt-card">
+          <div class="hgt-title">How to interpret results</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.8;font-family:var(--mono);">
+            <div style="margin-bottom:4px;"><span style="color:#f05050;">z &gt; 4.0</span> &nbsp;Strong signal — high confidence HGT, likely prophage or pathogenicity island</div>
+            <div style="margin-bottom:4px;"><span style="color:#f5a623;">z 2.5–4.0</span> &nbsp;Moderate signal — probable HGT, verify with gene content</div>
+            <div style="margin-bottom:4px;"><span style="color:#5b8df8;">GC deviation</span> &nbsp;Negative = insert from low-GC donor | Positive = insert from high-GC donor</div>
+            <div><span style="color:#1dc9a0;">Large islands</span> &nbsp;Single bins = recent/sharp insertion | Multi-bin = larger element or older/ameliorated</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MASH comparison view -->
+    <div class="view" id="view-mash">
+      <div style="padding:1.5rem;overflow-y:auto;height:calc(100vh - 56px);">
+
+        <div class="mash-card">
+          <div class="mash-title">Input genomes</div>
+          <div class="field">
+            <label>Genome folder (FASTA files)</label>
+            <div style="display:flex;gap:6px;">
+              <input type="text" id="mash-folder"
+                     placeholder="/path/to/genomes"
+                     style="flex:1;" oninput="updateMashSummary()" />
+              <button class="folder-check" onclick="validateMashFolder()">Check</button>
+            </div>
+            <div class="folder-status" id="mash-folder-status"></div>
+          </div>
+        </div>
+
+        <div class="mash-card">
+          <div class="mash-title">Parameters</div>
+          <div class="param-grid">
+            <div class="field">
+              <label>k-mer sizes (KALI)</label>
+              <input type="text" id="mash-k" value="3 4 5" />
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">hash.py supports any k. Use k ≤ 7 for full vectors, add --bins for k &gt; 7.</div>
+            </div>
+            <div class="field">
+              <label>Bin size (bp)</label>
+              <input type="text" id="mash-bin" value="5000" />
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">Use 500 for viruses, 5000 for bacteria.</div>
+            </div>
+            <div class="field">
+              <label>MASH sketch size</label>
+              <input type="text" id="mash-sketch" value="10000" />
+            </div>
+            <div class="field">
+              <label>MASH k-mer size</label>
+              <input type="text" id="mash-kmer" value="21" />
+            </div>
+          </div>
+          <div class="hgt-stat" style="color:#f5a623;background:rgba(245,166,35,.06);border-color:rgba(245,166,35,.2);">
+            Computes MASH MinHash distances and KALI cosine distances on the same genomes,
+            then reports Spearman r split by within-genus vs between-genus pairs.
+            Requires: mash installed (brew install mash).
+          </div>
+        </div>
+
+        <div class="mash-card">
+          <div class="mash-title">Metadata (optional — for within/between genus split)</div>
+          <div class="field">
+            <label>Metadata Excel or CSV file (must have Accession + Genus columns)</label>
+            <input type="text" id="mash-meta"
+                   placeholder="/path/to/metadata.xlsx or leave blank"
+                   oninput="updateMashSummary()" />
+          </div>
+        </div>
+
+        <div class="mash-card">
+          <div class="mash-title">Run</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;" id="mash-summary">
+            Enter genome folder to continue
+          </div>
+          <button class="mash-btn" id="mash-btn" onclick="runMash()" disabled>
+            Run KALI vs MASH comparison
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Download view -->
+    <div class="view" id="view-download">
+      <div style="padding:1.5rem;overflow-y:auto;height:calc(100vh - 56px);">
+
+        <div class="dl-card">
+          <div class="dl-title">Download genomes from NCBI</div>
+          <div style="display:flex;gap:6px;margin-bottom:1rem;">
+            <button class="db-btn active" id="dlmode-browse" onclick="setDlMode('browse')">Browse taxonomy</button>
+            <button class="db-btn"        id="dlmode-search" onclick="setDlMode('search')">Search by name</button>
+            <button class="db-btn"        id="dlmode-acc"    onclick="setDlMode('acc')">Paste accessions</button>
+          </div>
+
+          <!-- BROWSE MODE -->
+          <div id="dl-panel-browse">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;">Click a group to expand. Click a leaf node to select it for download.</div>
+            <div class="db-toggle" style="margin-bottom:.75rem;">
+              <button class="db-btn active" id="bk-virus"    onclick="loadKingdom('virus')">Viruses</button>
+              <button class="db-btn"        id="bk-bacteria" onclick="loadKingdom('bacteria')">Bacteria</button>
+              <button class="db-btn"        id="bk-archaea"  onclick="loadKingdom('archaea')">Archaea</button>
+            </div>
+            <div style="margin-bottom:.6rem;">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Selected (click to remove):</div>
+              <div id="selected-badges"><span style="color:var(--muted);font-size:10px;">None selected</span></div>
+            </div>
+            <div id="tax-tree" style="font-family:var(--mono);font-size:11px;line-height:1.8;max-height:280px;overflow-y:auto;"></div>
+          </div>
+
+          <!-- SEARCH MODE -->
+          <div id="dl-panel-search" style="display:none;">
+            <div class="field">
+              <label>Organism, family, genus, or keyword</label>
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="dl-search-input"
+                       placeholder="e.g. Flaviviridae   or   Dengue virus   or   Hepacivirus"
+                       style="flex:1;"
+                       onkeydown="if(event.key==='Enter') checkCount()" />
+                <button class="browse-btn" onclick="checkCount()">Check count</button>
+              </div>
+              <div id="dl-count-info" style="margin-top:5px;font-size:11px;color:var(--teal);font-family:var(--mono);"></div>
+            </div>
+            <div style="margin-top:.5rem;">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Quick picks — click to load:</div>
+              <span class="example-chip" onclick="setTaxon('Flaviviridae')">Flaviviridae</span>
+              <span class="example-chip" onclick="setTaxon('Hepacivirus')">Hepacivirus</span>
+              <span class="example-chip" onclick="setTaxon('Pegivirus')">Pegivirus</span>
+              <span class="example-chip" onclick="setTaxon('Pestivirus')">Pestivirus</span>
+              <span class="example-chip" onclick="setTaxon('Orthoflavivirus')">Orthoflavivirus</span>
+              <span class="example-chip" onclick="setTaxon('Poxviridae')">Poxviridae</span>
+              <span class="example-chip" onclick="setTaxon('Coronaviridae')">Coronaviridae</span>
+              <span class="example-chip" onclick="setTaxon('Retroviridae')">Retroviridae</span>
+              <span class="example-chip" onclick="setTaxon('Enterobacteriaceae')">Enterobacteriaceae</span>
+              <span class="example-chip" onclick="setTaxon('Mycobacterium')">Mycobacterium</span>
+              <span class="example-chip" onclick="setTaxon('Staphylococcus')">Staphylococcus</span>
+              <span class="example-chip" onclick="setTaxon('Streptococcus')">Streptococcus</span>
+            </div>
+          </div>
+
+          <!-- ACCESSION MODE -->
+          <div id="dl-panel-acc" style="display:none;">
+            <div class="field">
+              <label>Paste accession numbers (one per line or comma separated)</label>
+              <textarea id="dl-acc-input" rows="5"
+                style="width:100%;font-family:var(--mono);font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px;resize:vertical;"
+                placeholder="NC_001474&#10;NC_001477&#10;NC_002640&#10;AY632535, AY632536"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="dl-card">
+          <div class="dl-title">Options</div>
+          <div class="param-grid">
+            <div class="field">
+              <label>Max sequences to download</label>
+              <input type="number" id="dl-limit" value="100" min="1" max="500" style="font-size:12px;" />
+            </div>
+            <div class="field">
+              <label>File prefix (e.g. flaviviridae)</label>
+              <input type="text" id="dl-prefix" value="genome" style="font-size:12px;" />
+            </div>
+          </div>
+          <div class="checkbox-row" style="margin-bottom:.5rem;">
+            <input type="checkbox" id="dl-complete" checked>
+            <label for="dl-complete" style="font-size:12px;color:var(--text);">Complete genomes only</label>
+          </div>
+          <div class="hgt-stat" style="color:#1dc9a0;background:rgba(29,201,160,.06);border-color:rgba(29,201,160,.2);">
+            Each genome saved as individual FASTA. Metadata saved as Excel with accession, organism, genus, GC%, length, and more.
+          </div>
+        </div>
+
+        <!-- Run -->
+        <div class="dl-card">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;" id="dl-run-summary">Select a taxon or paste accessions to continue</div>
+          <button class="dl-btn" id="dl-run-btn" onclick="runDownload()">Download genomes + Excel metadata</button>
+        </div>
+
+      </div>
+    </div>
+
+        <!-- Tensor view -->
+    <div class="view" id="view-tensor">
+      <div style="padding:1.5rem;overflow-y:auto;height:calc(100vh - 56px);">
+
+        <!-- Mode toggle -->
+        <div class="tensor-card">
+          <div class="tensor-title">Tensor mode</div>
+          <div style="display:flex;gap:6px;margin-bottom:.75rem;">
+            <button class="db-btn active" id="tensor-mode-matrices" onclick="setTensorMode('matrices')"
+                  style="background:rgba(83,74,183,.15);border-color:#534AB7;color:#9b8ff8;">
+              Use Hash + KALI_non-hash matrices (recommended)
+            </button>
+            <button class="db-btn" id="tensor-mode-fasta" onclick="setTensorMode('fasta')"
+                  style="background:transparent;border-color:var(--border);color:var(--muted);">
+              Raw FASTA (internal computation)
+            </button>
+          </div>
+
+          <!-- Mode 2: matrices -->
+          <div id="tensor-panel-matrices">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;">
+              Select pre-computed distance matrix CSV files from the Results tab.
+              Each CSV becomes one layer of the tensor. Mix Hash and KALI_non-hash outputs for maximum signal.
+            </div>
+            <div id="tensor-matrix-rows">
+              <div class="tensor-matrix-row" style="display:flex;gap:6px;margin-bottom:5px;" id="tmrow-0">
+                <input type="text" placeholder="hash_k3.csv or full path"
+                       class="tensor-mat-path" data-row="0"
+                       style="flex:2;font-size:11px;font-family:var(--mono);"
+                       oninput="updateTensorSummary()" />
+                <input type="text" placeholder='Label e.g. "Hash k=3"'
+                       class="tensor-mat-label" data-row="0"
+                       style="flex:1;font-size:11px;" />
+                <button onclick="removeTensorRow(0)" style="background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;padding:0 8px;">✕</button>
+              </div>
+              <div class="tensor-matrix-row" style="display:flex;gap:6px;margin-bottom:5px;" id="tmrow-1">
+                <input type="text" placeholder="hash_k4.csv or full path"
+                       class="tensor-mat-path" data-row="1"
+                       style="flex:2;font-size:11px;font-family:var(--mono);"
+                       oninput="updateTensorSummary()" />
+                <input type="text" placeholder='Label e.g. "Hash k=4"'
+                       class="tensor-mat-label" data-row="1"
+                       style="flex:1;font-size:11px;" />
+                <button onclick="removeTensorRow(1)" style="background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;padding:0 8px;">✕</button>
+              </div>
+            </div>
+            <button onclick="addTensorRow()"
+                    style="font-size:11px;font-family:var(--mono);padding:5px 12px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;margin-top:4px;">
+              + Add layer
+            </button>
+            <div class="hgt-stat" style="color:#9b72f8;background:rgba(155,114,248,.08);border-color:rgba(155,114,248,.25);margin-top:.75rem;">
+              Recommended: hash_k3.csv + hash_k4.csv + hash_k5.csv + kali_non_hash_k3.csv.
+              Files in the outputs folder — just type the filename, no full path needed.
+            </div>
+          </div>
+
+          <!-- Mode 1: FASTA -->
+          <div id="tensor-panel-fasta" style="display:none;">
+            <div class="field">
+              <label>Folder path or single FASTA</label>
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="tensor-folder"
+                       placeholder="/path/to/genomes"
+                       style="flex:1;" oninput="updateTensorSummary()" />
+                <button class="folder-check" onclick="validateTensorFolder()">Check</button>
+              </div>
+              <div class="folder-status" id="tensor-folder-status"></div>
+            </div>
+            <div class="param-grid" style="margin-top:.75rem;">
+              <div class="field">
+                <label>k-mer scales</label>
+                <input type="text" id="tensor-k" value="2 3 4 5" />
+              </div>
+              <div class="field">
+                <label>Bin size (bp)</label>
+                <input type="text" id="tensor-bin" value="500" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tensor-card">
+          <div class="tensor-title">Fusion method</div>
+          <select id="tensor-fusion" style="font-size:12px;width:100%;">
+            <option value="variance">Variance — weights each layer by discriminating power (recommended)</option>
+            <option value="pca">PCA-weighted — uses first PC loadings as weights</option>
+            <option value="uniform">Uniform — equal weights for all layers</option>
+          </select>
+        </div>
+
+        <div class="tensor-card">
+          <div class="tensor-title">Genome names <span style="font-weight:400;color:var(--muted);font-size:10px;">(optional)</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.6rem;">
+            Upload a file mapping accession IDs to display names — replaces IDs
+            in the distance matrix, PCA table, and all CSV outputs.
+          </div>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:.75rem;opacity:.7;">
+            Supported: tab-separated &nbsp;<code style="background:rgba(255,255,255,.06);padding:1px 4px;border-radius:3px;">NC_011748	E. coli 55989</code>
+            &nbsp;or&nbsp; <code style="background:rgba(255,255,255,.06);padding:1px 4px;border-radius:3px;">NC_011748=E. coli 55989</code>
+          </div>
+          <label style="display:inline-block;padding:6px 14px;background:rgba(155,114,248,.12);border:1px solid rgba(155,114,248,.35);border-radius:6px;cursor:pointer;font-size:11px;color:#9b72f8;font-family:var(--mono);">
+            Upload name map
+            <input type="file" id="tensor-namemap-file" accept=".txt,.tsv,.csv"
+                   style="display:none;" onchange="parseTensorNameMap(this)">
+          </label>
+          <span id="tensor-namemap-status" style="font-size:11px;color:var(--teal);font-family:var(--mono);margin-left:10px;"></span>
+          <div id="tensor-namemap-preview" style="margin-top:.6rem;font-size:10px;font-family:var(--mono);color:var(--muted);display:none;max-height:72px;overflow:hidden;"></div>
+        </div>
+
+        <div class="tensor-card">
+          <div class="tensor-title">Report metadata <span style="font-weight:400;color:var(--muted);font-size:10px;">(optional)</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.6rem;">
+            Upload a <code style="font-family:var(--mono);background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;">.txt</code> or
+            <code style="font-family:var(--mono);background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;">.json</code> file with
+            key=value pairs — fields appear in the HTML report header.
+          </div>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:.6rem;opacity:.7;">
+            Example: &nbsp;project=MyStudy &nbsp;analyst=JaneDoe
+          </div>
+          <label style="display:inline-block;padding:6px 14px;background:rgba(155,114,248,.12);border:1px solid rgba(155,114,248,.35);border-radius:6px;cursor:pointer;font-size:11px;color:#9b72f8;font-family:var(--mono);">
+            Upload metadata file
+            <input type="file" id="tensor-meta-file" accept=".txt,.json"
+                   style="display:none;" onchange="parseTensorMeta(this)">
+          </label>
+          <span id="tensor-meta-status" style="font-size:11px;color:var(--teal);font-family:var(--mono);margin-left:10px;"></span>
+          <div id="tensor-meta-preview" style="margin-top:.6rem;font-size:10px;font-family:var(--mono);color:var(--muted);display:none;"></div>
+        </div>
+
+        <div class="tensor-card">
+          <div class="tensor-title">Silhouette scoring <span style="font-weight:400;color:var(--muted);font-size:10px;">(publication benchmark)</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.6rem;">
+            Provide your metadata CSV to enable silhouette scores — shows whether the fused tensor
+            produces better genus separation than any single-k matrix. Required for Oxford reviewers.
+          </div>
+          <div class="field">
+            <label>Metadata CSV with genus labels <span style="color:var(--muted);font-size:10px;">(same file used for classifier training)</span></label>
+            <input type="text" id="tensor-labels-col"
+                   placeholder="/path/to/virusannotation.csv (col 1: accession, col 2: genus)" />
+          </div>
+        </div>
+
+        <div class="tensor-card">
+          <div class="tensor-title">Run</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;" id="tensor-summary">
+            Add matrix CSV files or enter a genome folder to continue
+          </div>
+          <button class="tensor-btn" id="tensor-btn" onclick="runTensor()">
+            Build distance tensor
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Benchmark view -->
+    <div class="view" id="view-benchmark">
+      <div style="padding:1.5rem;overflow-y:auto;height:calc(100vh - 56px);">
+
+        <div class="classify-card">
+          <div class="classify-title" style="color:#f5a623;">KALI vs Kraken2 — Publication Benchmark</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;">
+            Compares KALI classification against Kraken2 on the same stratified holdout set.
+            Uses the same train/test split (random_state=42) as the Evaluate command for reproducibility.
+            Produces the comparison table required by Oxford <em>Bioinformatics</em> reviewers.
+          </div>
+
+          <div class="field">
+            <label>Genome folder</label>
+            <input type="text" id="bench-folder" placeholder="/path/to/labelled/genomes" />
+          </div>
+          <div class="field">
+            <label>Metadata CSV / Excel</label>
+            <input type="text" id="bench-meta" placeholder="virusannotation.csv" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field">
+              <label>Accession column</label>
+              <input type="text" id="bench-acc-col" value="Accession" />
+            </div>
+            <div class="field">
+              <label>Label column</label>
+              <input type="text" id="bench-label-col" value="Group" />
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div class="field">
+              <label>File pattern</label>
+              <input type="text" id="bench-pattern" value="cleaned_{accession}.fasta" />
+            </div>
+            <div class="field">
+              <label>Holdout fraction</label>
+              <input type="number" id="bench-holdout" value="0.4" min="0.1" max="0.5" step="0.05" style="font-size:12px;" />
+            </div>
+            <div class="field">
+              <label>k-mer sizes</label>
+              <input type="text" id="bench-k" value="3 4 5" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Kraken2 DB path <span style="color:var(--muted);font-size:10px;">(optional — leave blank to skip Kraken2)</span></label>
+            <input type="text" id="bench-kraken-db" placeholder="/path/to/kraken2_db (optional)" />
+          </div>
+          <div class="field">
+            <label>Output name</label>
+            <input type="text" id="bench-output" value="results/benchmark" />
+          </div>
+          <button class="classify-btn" style="background:#6D3A0F;color:#FBBF7A;margin-top:.5rem;"
+                  onclick="runBenchmark()">
+            Run Benchmark
+          </button>
+          <div style="margin-top:1rem;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--muted);font-family:var(--mono);">
+            <div style="color:var(--amber);margin-bottom:4px;">Install Kraken2 (optional):</div>
+            conda install -c bioconda kraken2<br>
+            kraken2-build --download-taxonomy --db /path/to/db<br>
+            kraken2-build --add-to-library train.fasta --db /path/to/db<br>
+            kraken2-build --build --db /path/to/db
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RF Distance view -->
+    <div class="view" id="view-rfdist">
+      <div style="padding:1.5rem;overflow-y:auto;height:calc(100vh - 56px);">
+
+        <div class="classify-card">
+          <div class="classify-title" style="color:#1dc9a0;">Robinson-Foulds Tree Distance</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;">
+            Compares your KALI-inferred tree against a reference tree (e.g. from FastTree or RAxML).
+            Normalized RF distance close to 0 means high topological agreement. Required for Oxford reviewers.
+          </div>
+
+          <div class="field">
+            <label>KALI tree (.nwk) — from Tree module output</label>
+            <input type="text" id="rf-kali-tree" placeholder="/path/to/kali_tree.nwk" />
+          </div>
+          <div class="field">
+            <label>Reference tree (.nwk) — from FastTree / RAxML on aligned sequences</label>
+            <input type="text" id="rf-ref-tree" placeholder="/path/to/fasttree_reference.nwk" />
+          </div>
+          <div class="field">
+            <label>Output name</label>
+            <input type="text" id="rf-output" value="results/rf_comparison" />
+          </div>
+          <button class="classify-btn" style="background:#0F4A3A;color:#6EE7C4;"
+                  onclick="runRFDistance()">
+            Compute RF Distance
+          </button>
+          <div style="margin-top:1rem;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--muted);font-family:var(--mono);">
+            <div style="color:var(--teal);margin-bottom:4px;">Build a reference tree (run in terminal):</div>
+            conda install -c bioconda muscle fasttree<br>
+            muscle -in flaviviridae_370.fasta -out aligned.fasta<br>
+            FastTree -nt -gtr aligned.fasta > reference.nwk
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Outbreak view -->
+    <div class="view" id="view-outbreak">
+      <div style="padding:1.5rem;overflow-y:auto;height:calc(100vh - 56px);">
+
+        <div class="outbreak-card">
+          <div class="outbreak-title"><span class="pulse-dot"></span>Surveillance mode</div>
+          <div style="display:flex;gap:5px;margin-bottom:1rem;">
+            <button class="mode-btn active" id="ob-mode-watch" onclick="setOutbreakMode('watch')">Watch folder</button>
+            <button class="mode-btn"        id="ob-mode-single" onclick="setOutbreakMode('single')">Single genome</button>
+          </div>
+          <div id="ob-input-watch">
+            <div class="field">
+              <label>Inbox folder to watch</label>
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="outbreak-inbox"
+                       placeholder="/path/to/incoming_sequences"
+                       style="flex:1;" oninput="updateOutbreakSummary()" />
+                <button class="folder-check" onclick="validateOutbreakFolder()">Check</button>
+              </div>
+              <div class="folder-status" id="outbreak-folder-status"></div>
+            </div>
+            <div class="hgt-stat" style="color:#f05050;background:rgba(240,80,80,.06);border-color:rgba(240,80,80,.2);margin-top:.5rem;">
+              Watches folder continuously — processes every new FASTA file the moment it appears.
+              Runs classify + HGT + alerts automatically.
+            </div>
+          </div>
+          <div id="ob-input-single" style="display:none;">
+            <div class="field">
+              <label>Single FASTA file path</label>
+              <input type="text" id="outbreak-single"
+                     placeholder="/path/to/new_genome.fasta"
+                     oninput="updateOutbreakSummary()" />
+            </div>
+          </div>
+        </div>
+
+        <div class="outbreak-card">
+          <div class="outbreak-title">Parameters</div>
+          <div class="param-grid">
+            <div class="field">
+              <label>Classifier model</label>
+              <select id="outbreak-model" style="font-size:12px;" onchange="updateOutbreakSummary()">
+                <option value="">None (skip classification)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>k-mer sizes</label>
+              <input type="text" id="outbreak-k" value="3 4" />
+            </div>
+            <div class="field">
+              <label>Bin size (bp)</label>
+              <input type="text" id="outbreak-bin" value="500" />
+            </div>
+            <div class="field">
+              <label>HGT z-threshold</label>
+              <input type="text" id="outbreak-z" value="2.0" />
+            </div>
+          </div>
+        </div>
+
+        <div class="outbreak-card">
+          <div class="outbreak-title">Launch</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;" id="outbreak-summary">
+            Set an inbox folder or single file to continue
+          </div>
+          <button class="outbreak-btn" id="outbreak-btn" onclick="runOutbreak()" disabled>
+            Start surveillance
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- KALI_hash view -->
+    <div class="view" id="view-KALI_hash">
+      <div style="padding:1.5rem;overflow-y:auto;height:calc(100vh - 56px);">
+
+        <div class="classify-card">
+          <div class="classify-title" style="color:#1dc9a0;">KALI_hash-Histogram Distance</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:1rem;">
+            Captures how each k-mer is <strong>spatially distributed</strong> across the genome —
+            not just how often it appears. Closely matches KALI_non-hash output (r&nbsp;&gt;&nbsp;0.975)
+            at near-identical speed to hash.py. Use uploaded files or a local folder path.
+          </div>
+
+          <div class="param-grid">
+            <div class="field">
+              <label>k-mer size</label>
+              <input type="text" id="KALI_hash-k" value="3 4 5" placeholder="e.g. 3 4 5"
+                     title="One k value or multiple e.g. 3 4 5" style="width:100%">
+            </div>
+            <div class="field">
+              <label>Combine multiple k?</label>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+                  <input type="checkbox" id="KALI_hash-combine" onchange="toggleSpacingCombineMethod()">
+                  Yes — produce combined matrix
+                </label>
+              </div>
+            </div>
+            <div class="field" id="KALI_hash-combine-method-field" style="display:none;">
+              <label>Combine method</label>
+              <select id="KALI_hash-combine-method" style="width:100%">
+                <option value="average" selected>Average — average per-k matrices</option>
+                <option value="concat">Concat — concatenate vectors (richer signal)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Histogram bins per k-mer</label>
+              <select id="KALI_hash-bins" style="width:100%">
+                <option value="20" selected>20 — fast, r≈0.975 vs KALI_non-hash</option>
+                <option value="50">50 — r≈0.985 vs KALI_non-hash</option>
+                <option value="100">100 — r≈0.996 vs KALI_non-hash</option>
+                <option value="200">200 — r≈0.9996 (slowest)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Distance metric</label>
+              <select id="KALI_hash-metric" style="width:100%">
+                <option value="cosine" selected>cosine</option>
+                <option value="euclidean">euclidean</option>
+                <option value="jaccard">jaccard</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Local folder path (optional)</label>
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="KALI_hash-folder" placeholder="/path/to/genomes"
+                       style="flex:1;" oninput="validateSpacingFolder()">
+                <button class="folder-check" onclick="validateSpacingFolder()">Check</button>
+              </div>
+              <div class="folder-status" id="KALI_hash-folder-status"></div>
+            </div>
+          </div>
+
+          <div style="font-size:11px;color:var(--muted);margin-bottom:.75rem;" id="KALI_hash-input-summary">
+            Uses currently uploaded files if no folder is specified.
+          </div>
+
+          <button class="classify-btn" style="background:#0F4A3A;color:#6EE7C4;"
+                  onclick="runSpacingAnalysis()">
+            Run KALI_hash Analysis
+          </button>
+
+          <div id="KALI_hash-log-box"
+               style="display:none;margin-top:1rem;padding:10px;background:var(--surface);
+                      border:1px solid var(--border);border-radius:6px;font-size:11px;
+                      font-family:var(--mono);color:var(--muted);white-space:pre-wrap;
+                      max-height:260px;overflow-y:auto;"></div>
+
+          <div id="KALI_hash-results-box" style="display:none;margin-top:1rem;">
+            <div style="font-size:12px;font-weight:600;color:#1dc9a0;margin-bottom:.5rem;">Output files</div>
+            <div id="KALI_hash-files-list"></div>
+            <button class="classify-btn"
+                    style="background:#0F2A4A;color:#6EE7C4;margin-top:.75rem;"
+                    onclick="buildTreeFromSpacingResult()">
+              Build Tree from this matrix
+            </button>
+          </div>
+        </div>
+
+        <div class="classify-card" style="margin-top:1rem;">
+          <div class="classify-title" style="color:#888;font-size:11px;">How it compares to other methods</div>
+          <table style="width:100%;font-size:11px;border-collapse:collapse;color:var(--muted);">
+            <tr style="border-bottom:1px solid var(--border);">
+              <th style="text-align:left;padding:5px 8px;">Method</th>
+              <th style="text-align:right;padding:5px 8px;">r vs KALI_non-hash</th>
+              <th style="text-align:right;padding:5px 8px;">Speed</th>
+              <th style="text-align:left;padding:5px 8px;">Signal captured</th>
+            </tr>
+            <tr><td style="padding:5px 8px;">hash.py</td><td style="text-align:right;padding:5px 8px;">0.877</td><td style="text-align:right;padding:5px 8px;">fastest</td><td style="padding:5px 8px;">k-mer frequency only</td></tr>
+            <tr style="background:rgba(29,201,160,.06);">
+              <td style="padding:5px 8px;color:#1dc9a0;font-weight:600;">KALI_hash (20 bins)</td>
+              <td style="text-align:right;padding:5px 8px;color:#1dc9a0;">0.975</td>
+              <td style="text-align:right;padding:5px 8px;">fast</td>
+              <td style="padding:5px 8px;">frequency + spatial distribution</td>
+            </tr>
+            <tr><td style="padding:5px 8px;">KALI_hash (200 bins)</td><td style="text-align:right;padding:5px 8px;">0.9996</td><td style="text-align:right;padding:5px 8px;">fast</td><td style="padding:5px 8px;">near-identical to KALI_non-hash</td></tr>
+            <tr><td style="padding:5px 8px;">KALI_non-hash</td><td style="text-align:right;padding:5px 8px;">1.000</td><td style="text-align:right;padding:5px 8px;">slow</td><td style="padding:5px 8px;">full spatial distribution</td></tr>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+var uploadedFiles = [];
+var currentScript = 'pipeline';
+var currentJobId  = null;
+var currentFile   = null;
+var eventSource   = null;
+var logLineCount  = 0;
+var jobStore      = {};
+
+function showView(name) {
+  try {
+    document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+    var viewEl = document.getElementById('view-' + name);
+    if (viewEl) { viewEl.classList.add('active'); }
+    document.querySelectorAll('.htab').forEach(function(t) { t.classList.remove('active'); });
+    var tabId = name === 'welcome' ? 'htab-home' : 'htab-' + name;
+    var tabEl = document.getElementById(tabId);
+    if (tabEl) { tabEl.classList.add('active'); }
+  } catch(e) { console.warn('showView error:', e); }
+}
+
+function selectScript(s) {
+  currentScript = s;
+  document.getElementById('btn-hash').classList.toggle('active', s === 'hash');
+  document.getElementById('btn-KALI_non-hash').classList.toggle('active', s === 'KALI_non-hash');
+  document.getElementById('btn-KALI_hash').classList.toggle('active', s === 'KALI_hash');
+
+  // KALI_non-hash-only fields (band plot)
+  var pyOnly = document.querySelectorAll('.KALI_non-hash-only');
+  pyOnly.forEach(function(el) { el.style.display = s === 'KALI_non-hash' ? 'flex' : 'none'; });
+
+  // KALI_hash-only fields (KALI_hash bins selector)
+  var spOnly = document.querySelectorAll('.KALI_hash-only');
+  spOnly.forEach(function(el) { el.style.display = s === 'KALI_hash' ? 'flex' : 'none'; });
+
+  // hide regular bin size field for KALI_hash (it uses KALI_hash bins instead)
+  document.getElementById('field-bins').style.display = s === 'KALI_hash' ? 'none' : 'flex';
+
+  // hide mode/combine for KALI_hash (not applicable)
+  document.getElementById('field-mode').style.display = s === 'KALI_hash' ? 'none' : 'flex';
+  document.getElementById('param-combine').parentElement.style.display = s === 'KALI_hash' ? 'none' : 'flex';
+
+  document.getElementById('label-bins').textContent = s === 'hash' ? 'Bin size' : 'Histogram bins';
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('over');
+  if (e.dataTransfer.files.length) { handleFiles(e.dataTransfer.files); }
+}
+
+function handleFiles(files) {
+  var formData = new FormData();
+  for (var i = 0; i < files.length; i++) { formData.append('files', files[i]); }
+  fetch('/upload', { method: 'POST', body: formData })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.files) {
+        data.files.forEach(function(f) {
+          if (uploadedFiles.indexOf(f) === -1) { uploadedFiles.push(f); }
+        });
+        renderFileList();
+        updateRunBtn();
+        toast('Uploaded ' + data.files.length + ' file(s)', 'success');
+      }
+    });
+}
+
+function removeFile(name) {
+  uploadedFiles = uploadedFiles.filter(function(f) { return f !== name; });
+  renderFileList();
+  updateRunBtn();
+}
+
+function renderFileList() {
+  var el  = document.getElementById('file-list');
+  var btn = document.getElementById('clear-btn');
+  var html = '';
+  uploadedFiles.forEach(function(f) {
+    html += '<div class="file-item">';
+    html += '<div class="fi-dot"></div>';
+    html += '<div class="fi-name" title="' + f + '">' + f + '</div>';
+    html += '<button class="fi-rm" onclick="removeFile(\'' + f + '\')">&#x00D7;</button>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+  btn.style.display = uploadedFiles.length > 0 ? 'block' : 'none';
+}
+
+function clearUploads() {
+  fetch('/clear-uploads', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      uploadedFiles = [];
+      renderFileList();
+      updateRunBtn();
+      toast('Cleared ' + d.count + ' file(s)', 'success');
+    });
+}
+
+function updateRunBtn() {
+  var btn = document.getElementById('run-btn');
+  if (uploadedFiles.length > 0) {
+    btn.disabled = false;
+    btn.textContent = 'Run analysis (' + uploadedFiles.length + ' file' + (uploadedFiles.length > 1 ? 's' : '') + ')';
+  } else {
+    btn.disabled = true;
+    btn.textContent = 'Upload files to run';
+  }
+}
+
+function validateFolder() {
+  var path = document.getElementById('folder-path').value.trim();
+  if (!path) { return; }
+  fetch('/validate-folder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder: path })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    var el = document.getElementById('folder-status');
+    if (d.valid) {
+      el.textContent = 'Found ' + d.count.toLocaleString() + ' genome files';
+      el.className = 'folder-status ok';
+      el.style.display = 'block';
+      var btn = document.getElementById('run-btn');
+      btn.disabled = false;
+      btn.textContent = 'Run on ' + d.count.toLocaleString() + ' genomes';
+    } else {
+      el.textContent = d.error || 'Folder not found';
+      el.className = 'folder-status err';
+      el.style.display = 'block';
+    }
+  });
+}
+
+function runAnalysis() {
+  var kRaw = document.getElementById('param-k').value.trim().split(/\s+/).map(Number).filter(function(n) { return n > 0; });
+  var bins  = parseInt(document.getElementById('param-bins').value) || 50;
+  var metric  = document.getElementById('param-metric').value;
+  var mode    = document.getElementById('param-mode').value;
+  var reduce  = document.getElementById('param-reduce').value;
+  var combine = document.getElementById('param-combine').checked;
+  var plot    = document.getElementById('param-plot').checked;
+  var folder  = document.getElementById('folder-path').value.trim();
+
+  if (!kRaw.length) { toast('Enter at least one k value', 'error'); return; }
+  if (!folder && !uploadedFiles.length) { toast('Upload files or enter a folder path', 'error'); return; }
+
+  var payload = {
+    script: currentScript, k: kRaw, bins: bins, metric: metric,
+    mode: mode, reduce: reduce, combine: combine, plot: plot,
+    files: folder ? [] : uploadedFiles,
+    folder: folder
+  };
+
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('run-btn').textContent = 'Running…';
+
+  clearLog();
+  showView('log');
+  setBadge('running', 'RUNNING');
+  document.getElementById('log-title').textContent = currentScript + ' | k=' + kRaw.join(',') + ' | bins=' + bins + ' | ' + metric;
+  document.getElementById('progress-wrap').style.display = 'block';
+  setProgress(0, 'Starting…');
+
+  // KALI_hash uses its own endpoint and payload
+  if (currentScript === 'KALI_hash') {
+    var spacingBins = parseInt(document.getElementById('param-KALI_hash-bins').value) || 200;
+    var spacingPayload = {
+      files:          folder ? [] : uploadedFiles,
+      folder:         folder,
+      k:              kRaw.length > 1 ? kRaw : (kRaw[0] || 4),
+      bins:           spacingBins,
+      metric:         metric,
+      combine:        kRaw.length > 1,
+      combine_method: "average",
+      verbose:        true
+    };
+    fetch('/run-KALI-hash', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(spacingPayload)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) { toast(data.error, 'error'); resetRunBtn(); return; }
+      currentJobId = data.job_id;
+      listenSSE(data.job_id);
+    });
+    return;
+  }
+
+  fetch('/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) { toast(data.error, 'error'); resetRunBtn(); return; }
+    currentJobId = data.job_id;
+    listenSSE(data.job_id);
+  });
+}
+
+function listenSSE(jobId) {
+  if (eventSource) { eventSource.close(); }
+  var retries = 0;
+
+  function connect() {
+    eventSource = new EventSource('/stream/' + jobId);
+
+    eventSource.addEventListener('log', function(e) {
+      addLogLine(e.data);
+      logLineCount++;
+      var pct = Math.min(95, Math.round(logLineCount / 2));
+      var lbl = e.data.length > 60 ? e.data.slice(0, 58) + '...' : e.data;
+      setProgress(pct, lbl);
+    });
+
+    eventSource.addEventListener('done', function(e) {
+      var data = JSON.parse(e.data);
+      setProgress(100, 'Complete');
+      setBadge('done', 'DONE');
+      addLogLine('Analysis complete', 'success');
+      renderResults(data.files);
+      resetRunBtn();
+      eventSource.close();
+      if (data.files && data.files.length > 0) {
+        setTimeout(function() { showView('results'); }, 600);
+      }
+      toast('Analysis complete', 'success');
+      loadJobs();
+    });
+
+    eventSource.addEventListener('error', function(e) {
+      if (e.data) {
+        setBadge('error', 'ERROR');
+        addLogLine('Error: ' + e.data, 'error');
+        setProgress(0, 'Failed');
+        resetRunBtn();
+        toast('Job failed', 'error');
+        eventSource.close();
+      } else {
+        // Connection error — retry up to 5 times
+        eventSource.close();
+        retries++;
+        if (retries <= 5) {
+          addLogLine('Reconnecting... (attempt ' + retries + ')', '');
+          setTimeout(connect, 1500);
+        } else {
+          setBadge('error', 'ERROR');
+          addLogLine('Connection lost after 5 retries', 'error');
+          setProgress(0, 'Connection lost');
+          resetRunBtn();
+        }
+      }
+    });
+  }
+
+  connect();
+}
+
+function clearLog() {
+  document.getElementById('log-body').innerHTML = '';
+  logLineCount = 0;
+}
+
+function addLogLine(text, cls) {
+  var el   = document.getElementById('log-body');
+  var line = document.createElement('div');
+  line.className = 'log-line ' + (cls || classifyLine(text));
+  line.textContent = text;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function classifyLine(text) {
+  if (/saved|complete|done|✓/i.test(text)) { return 'success'; }
+  if (/time|elapsed/i.test(text))            { return 'timing'; }
+  if (/error|failed|traceback/i.test(text))  { return 'error'; }
+  if (/={3,}|kali/i.test(text))             { return 'header'; }
+  if (text.trim().length > 0)                { return 'info'; }
+  return '';
+}
+
+function setBadge(cls, text) {
+  var b = document.getElementById('log-badge');
+  b.className = 'badge badge-' + cls;
+  b.textContent = text;
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = label;
+}
+
+function resetRunBtn() {
+  var btn = document.getElementById('run-btn');
+  btn.disabled = false;
+  btn.textContent = 'Run analysis (' + uploadedFiles.length + ' file' + (uploadedFiles.length > 1 ? 's' : '') + ')';
+}
+
+function renderResults(files) {
+  var tabs = document.getElementById('file-tabs');
+  tabs.innerHTML = '';
+  files.forEach(function(f, i) {
+    var btn = document.createElement('button');
+    btn.className = 'ftab' + (f.endsWith('.html') ? ' html-tab' : '');
+    btn.textContent = f.replace(/^kali_[a-f0-9]+_/, '');
+    btn.setAttribute('data-file', f);
+    btn.onclick = function() { previewFile(f, btn); };
+    if (i === 0) { btn.classList.add('active'); previewFile(f, btn); }
+    tabs.appendChild(btn);
+  });
+  document.getElementById('dl-btn').style.display   = 'block';
+  document.getElementById('tree-btn').style.display = 'block';
+
+  // Show Mantel plot button only for MASH comparison results
+  var hasMash = files.some(function(f){ return f.indexOf('mash') !== -1; });
+  var mantelBtn = document.getElementById('mantel-btn');
+  if (mantelBtn) mantelBtn.style.display = hasMash ? 'block' : 'none';
+  if (hasMash) window._lastMashFiles = files;
+}
+
+function previewFile(filename, tab) {
+  currentFile = filename;
+  document.querySelectorAll('.ftab').forEach(function(t) { t.classList.remove('active'); });
+  if (tab) { tab.classList.add('active'); }
+
+  var isCsv   = filename.endsWith('.csv');
+  var treeBtn = document.getElementById('tree-btn');
+  var csvName = document.getElementById('tree-csv-name');
+  treeBtn.disabled = !isCsv;
+  if (csvName) {
+    csvName.textContent = isCsv ? filename : 'No CSV selected — click a .csv file tab';
+    csvName.style.color = isCsv ? '#9b72f8' : 'var(--muted)';
+  }
+  treeBtn.style.opacity = isCsv ? '1' : '0.35';
+  document.getElementById('tree-status').style.display = 'none';
+
+  var body = document.getElementById('results-body');
+  if (filename.endsWith('.html')) {
+    body.innerHTML = '<iframe src="/preview/' + filename + '" title="Result" style="width:100%;height:100%;border:none;"></iframe>';
+  } else if (filename.endsWith('.csv')) {
+    // Distance matrix CSV — render as interactive heatmap
+    fetch('/preview/' + filename)
+      .then(function(r) { return r.text(); })
+      .then(function(text) {
+        renderDistanceHeatmap(body, text, filename);
+      });
+  } else {
+    fetch('/preview/' + filename)
+      .then(function(r) { return r.text(); })
+      .then(function(text) {
+        var rows = text.trim().split('\n').map(function(r) { return r.split(','); });
+        var html = '<div style="overflow:auto;padding:1.5rem;">';
+        html += '<table style="border-collapse:collapse;font-size:11px;font-family:var(--mono);">';
+        rows.forEach(function(row, i) {
+          html += '<tr>';
+          row.forEach(function(cell) {
+            var s = i===0
+              ? 'border:0.5px solid var(--color-border-tertiary);padding:5px 10px;font-weight:500;background:var(--color-background-secondary);'
+              : 'border:0.5px solid var(--color-border-tertiary);padding:5px 10px;';
+            html += '<td style="' + s + '">' + cell + '</td>';
+          });
+          html += '</tr>';
+        });
+        html += '</table></div>';
+        body.innerHTML = html;
+      });
+  }
+}
+
+function downloadCurrent() {
+  if (currentFile) { window.open('/download/' + currentFile); }
+}
+
+function buildTree() {
+  if (!currentFile || !currentFile.endsWith('.csv')) { return; }
+  var btn    = document.getElementById('tree-btn');
+  var status = document.getElementById('tree-status');
+  btn.disabled = true;
+  btn.textContent = 'Building…';
+  status.style.display = 'block';
+  status.style.color   = 'var(--muted)';
+  status.textContent   = 'Running kali_tree.py…';
+
+  var metaFile = document.getElementById('tree-meta-file')
+                  ? document.getElementById('tree-meta-file').value.trim()
+                  : '';
+  var method = document.getElementById('tree-method')
+               ? document.getElementById('tree-method').value : 'upgma';
+  var groupCol = document.getElementById('tree-group-col')
+                  ? document.getElementById('tree-group-col').value : '';
+  fetch('/build-tree', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ csv_file: currentFile, metadata_file: metaFile, method: method, group_col: groupCol })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btn.textContent = '▲ Build tree';
+    if (data.error) {
+      status.style.color = 'var(--red)';
+      status.textContent = data.error;
+    } else {
+      status.style.color = 'var(--teal)';
+      status.textContent = 'Tree ready';
+      var tabs = document.getElementById('file-tabs');
+      var existing = tabs.querySelector('[data-file="' + data.html_file + '"]');
+      if (!existing) {
+        var newTab = document.createElement('button');
+        newTab.className = 'ftab html-tab';
+        newTab.setAttribute('data-file', data.html_file);
+        newTab.textContent = data.html_file.replace(/^kali_[a-f0-9]+_/, '');
+        var hf = data.html_file;
+        newTab.onclick = function() { previewFile(hf, newTab); };
+        tabs.appendChild(newTab);
+      }
+      var openTab = tabs.querySelector('[data-file="' + data.html_file + '"]');
+      previewFile(data.html_file, openTab);
+      toast('Tree built', 'success');
+      loadJobs();
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.textContent = '▲ Build tree';
+    status.style.color = 'var(--red)';
+    status.textContent = 'Request failed';
+  });
+}
+
+function loadJobs() {
+  fetch('/jobs')
+    .then(function(r) { return r.json(); })
+    .then(function(jobs) {
+      var el = document.getElementById('jobs-list');
+      var entries = Object.entries(jobs).reverse().slice(0, 8);
+      if (!entries.length) { return; }
+      entries.forEach(function(e) { jobStore[e[0]] = e[1]; });
+      var html = '';
+      entries.forEach(function(entry) {
+        var id = entry[0];
+        var j  = entry[1];
+        var label = j.files && j.files.length
+          ? j.files[0].replace(/^kali_[a-f0-9]+_/, '')
+          : id;
+        html += '<div class="job-item" onclick="reloadJob(\'' + id + '\')">';
+        html += '<div class="job-dot ' + j.status + '"></div>';
+        html += '<div class="job-id">' + id + '</div>';
+        html += '<div class="job-info">' + label + '</div>';
+        html += '</div>';
+      });
+      el.innerHTML = html;
+    })
+    .catch(function() {});
+}
+
+function reloadJob(jobId) {
+  var j = jobStore[jobId];
+  if (!j || !j.files || !j.files.length) { showView('log'); return; }
+  renderResults(j.files);
+  showView('results');
+  toast('Loaded job ' + jobId, 'success');
+}
+
+function toast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  setTimeout(function() { el.classList.remove('show'); }, 3000);
+}
+
+fetch('/uploads').then(function(r) { return r.json(); }).then(function(d) {
+  if (d.files && d.files.length) { uploadedFiles = d.files; renderFileList(); updateRunBtn(); updateClassifyUploadInfo(); }
+});
+loadJobs();
+setInterval(function() { try { loadJobs(); } catch(e) {} }, 5000);
+
+// ── Groq AI Chat with Memory ─────────────────────────────────────────
+var currentResultContent = '';
+var currentResultType    = 'analysis';
+var currentConvId        = null;
+var lastLogContent       = '';
+
+function showAIPanel() {
+  var panel = document.getElementById('ai-panel');
+  panel.style.display = 'block';
+  loadConversations();
+  // Expand if minimised
+  var body = document.getElementById('ai-panel-body');
+  var btn  = document.getElementById('ai-minimize-btn');
+  if (body) { body.style.display = 'block'; }
+  if (btn)  { btn.textContent = '− Minimise'; }
+}
+
+function toggleAIPanel() {
+  var body = document.getElementById('ai-panel-body');
+  var btn  = document.getElementById('ai-minimize-btn');
+  if (!body) return;
+  var isVisible = body.style.display !== 'none';
+  body.style.display = isVisible ? 'none' : 'block';
+  btn.textContent    = isVisible ? '+ Expand' : '− Minimise';
+}
+
+function setResultForAI(content, jobType) {
+  currentResultContent = content;
+  currentResultType    = jobType || 'analysis';
+}
+
+function addChatMessage(role, text) {
+  var box   = document.getElementById('ai-chat-box');
+  var div   = document.createElement('div');
+  div.style.cssText = 'margin-bottom:.75rem;';
+  var label = role === 'user' ? 'You' : '🤖 KALI-AI';
+  var color = role === 'user' ? '#5b8df8' : '#1dc9a0';
+  div.innerHTML =
+    '<div style="font-size:10px;color:' + color + ';font-weight:600;margin-bottom:2px;">' +
+    label + '</div>' +
+    '<div style="color:#c8d8f0;white-space:pre-wrap;">' +
+    text.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function clearChat() {
+  var box = document.getElementById('ai-chat-box');
+  box.innerHTML = '';
+}
+
+function runInterpret() {
+  // Called from 🤖 Interpret button in Results tab
+  var apiKey = document.getElementById('groq-api-key').value.trim();
+  var model  = document.getElementById('groq-model').value;
+
+  if (!apiKey) {
+    toast('Paste your Groq API key in the AI panel first', 'error');
+    showAIPanel();
+    return;
+  }
+  var results = currentResultContent || lastLogContent || '';
+  if (results.length < 10) {
+    toast('Open a result file first then click Interpret', 'error');
+    return;
+  }
+
+  // Start a new conversation
+  currentConvId = null;
+  showAIPanel();
+  clearChat();
+  document.getElementById('ai-conv-select').value = '';
+
+  var btn = document.getElementById('ai-run-btn');
+  btn.disabled = true; btn.textContent = 'Thinking...';
+  addChatMessage('user', 'Please interpret my ' + currentResultType + ' results.');
+
+  var backend     = document.getElementById('ai-backend') ? document.getElementById('ai-backend').value : 'groq';
+  var ollamaModel = document.getElementById('ollama-model') ? document.getElementById('ollama-model').value : 'llama3';
+  fetch('/interpret', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      results:         results.substring(0, 3500),
+      job_type:        currentResultType,
+      api_key:         apiKey,
+      model:           model,
+      backend:         backend,
+      ollama_model:    ollamaModel,
+      conversation_id: null,
+    })
+  }).then(function(r){return r.json();}).then(function(data){
+    btn.disabled = false; btn.textContent = 'Send';
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentConvId = data.conversation_id;
+    addChatMessage('assistant', data.interpretation);
+    document.getElementById('ai-model-tag').textContent = 'Model: ' + data.model + ' | Conv: ' + currentConvId;
+    loadConversations();
+  }).catch(function(e){
+    btn.disabled = false; btn.textContent = 'Send';
+    toast('AI request failed: ' + e.message, 'error');
+  });
+}
+
+function sendAIMessage() {
+  var apiKey  = document.getElementById('groq-api-key').value.trim();
+  var model   = document.getElementById('groq-model').value;
+  var input   = document.getElementById('ai-user-input');
+  var msg     = input.value.trim();
+  var btn     = document.getElementById('ai-run-btn');
+
+  if (!msg)    { input.focus(); return; }
+  if (!apiKey) { toast('Paste your Groq API key first', 'error'); return; }
+
+  addChatMessage('user', msg);
+  input.value = '';
+  btn.disabled = true; btn.textContent = 'Thinking...';
+
+  var backend2     = document.getElementById('ai-backend') ? document.getElementById('ai-backend').value : 'groq';
+  var ollamaModel2 = document.getElementById('ollama-model') ? document.getElementById('ollama-model').value : 'llama3';
+  fetch('/interpret', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      user_message:    msg,
+      job_type:        currentResultType,
+      api_key:         apiKey,
+      model:           model,
+      backend:         backend2,
+      ollama_model:    ollamaModel2,
+      conversation_id: currentConvId,
+    })
+  }).then(function(r){return r.json();}).then(function(data){
+    btn.disabled = false; btn.textContent = 'Send';
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentConvId = data.conversation_id;
+    addChatMessage('assistant', data.interpretation);
+    document.getElementById('ai-model-tag').textContent = 'Model: ' + data.model + ' | Conv: ' + currentConvId;
+    loadConversations();
+  }).catch(function(e){
+    btn.disabled = false; btn.textContent = 'Send';
+    toast('AI request failed: ' + e.message, 'error');
+  });
+}
+
+function loadConversations() {
+  fetch('/ai-conversations').then(function(r){return r.json();}).then(function(convs){
+    var sel = document.getElementById('ai-conv-select');
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">── New conversation ──</option>';
+    convs.forEach(function(c){
+      var opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.title + ' (' + c.id + ')';
+      sel.appendChild(opt);
+    });
+    if (cur) sel.value = cur;
+  });
+}
+
+function loadConversation(convId) {
+  if (!convId) {
+    currentConvId = null;
+    clearChat();
+    document.getElementById('ai-chat-box').innerHTML =
+      '<div style="color:#4a5580;font-size:11px;">New conversation started.</div>';
+    return;
+  }
+  fetch('/ai-conversation/' + convId).then(function(r){return r.json();}).then(function(data){
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentConvId = data.id;
+    currentResultType = data.job_type || 'analysis';
+    clearChat();
+    data.messages.forEach(function(msg){
+      if (msg.role !== 'system') addChatMessage(msg.role, msg.content);
+    });
+    document.getElementById('ai-model-tag').textContent = 'Loaded: ' + data.title;
+  });
+}
+
+function deleteConversation() {
+  if (!currentConvId) { toast('No conversation selected', 'error'); return; }
+  if (!confirm('Delete this conversation? This cannot be undone.')) return;
+  fetch('/ai-conversation/' + currentConvId, {method:'DELETE'})
+    .then(function(){
+      currentConvId = null;
+      clearChat();
+      loadConversations();
+      toast('Conversation deleted', 'success');
+    });
+}
+
+// ── AI backend toggle ────────────────────────────────────────────────
+function toggleAIBackend() {
+  var backend = document.getElementById('ai-backend').value;
+  var groq    = document.getElementById('groq-settings');
+  var ollama  = document.getElementById('ollama-settings');
+  if (!groq || !ollama) return;
+  groq.style.display   = backend === 'groq'   ? 'flex' : 'none';
+  ollama.style.display = backend === 'ollama' ? 'flex' : 'none';
+}
+
+// ── Distance matrix heatmap renderer ────────────────────────────────
+function renderDistanceHeatmap(container, csvText, filename) {
+  var rows   = csvText.trim().split('\n').map(function(r){ return r.split(','); });
+  var labels = rows[0].slice(1).map(function(l){ return l.trim().replace(/^"|"$/g,''); });
+  var n      = labels.length;
+  if (n === 0) { container.innerHTML='<p style="padding:1rem;color:var(--color-text-secondary);">Empty matrix</p>'; return; }
+
+  // Parse values
+  var matrix = [];
+  for (var i=1; i<rows.length; i++) {
+    var row = [];
+    for (var j=1; j<rows[i].length; j++) row.push(parseFloat(rows[i][j]) || 0);
+    if (row.length > 0) matrix.push(row);
+  }
+
+  // Stats
+  var flat=[], maxD=0, minD=Infinity, sum=0;
+  for (var i=0;i<matrix.length;i++) for (var j=0;j<matrix[i].length;j++) {
+    if (i!==j) { var v=matrix[i][j]; flat.push(v); sum+=v; if(v>maxD)maxD=v; if(v<minD)minD=v; }
+  }
+  var meanD = flat.length ? sum/flat.length : 0;
+
+  // Colour stops (teal)
+  var stops = ['#E1F5EE','#5DCAA5','#1D9E75','#0F6E56','#085041','#04342C'];
+
+  function interp(t) {
+    var sn=stops.length-1, i=Math.min(Math.floor(t*sn),sn-1), f=t*sn-i;
+    function h2r(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+    var a=h2r(stops[i]),b=h2r(stops[i+1]);
+    return 'rgb('+Math.round(a[0]+(b[0]-a[0])*f)+','+Math.round(a[1]+(b[1]-a[1])*f)+','+Math.round(a[2]+(b[2]-a[2])*f)+')';
+  }
+
+  var html = '<div style="padding:1rem;font-family:var(--font-sans);">';
+  // Stats row
+  html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;">';
+  [{l:'Sequences',v:n},{l:'Pairs',v:(n*(n-1)/2)},{l:'Mean dist',v:meanD.toFixed(4)},{l:'Max dist',v:maxD.toFixed(4)}].forEach(function(s){
+    html += '<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.6rem .8rem;">';
+    html += '<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:2px;">'+s.l+'</div>';
+    html += '<div style="font-size:18px;font-weight:500;color:var(--color-text-primary);">'+s.v+'</div></div>';
+  });
+  html += '</div>';
+
+  // Heatmap table
+  html += '<div style="overflow:auto;"><table style="border-collapse:collapse;font-size:10px;font-family:var(--font-mono);">';
+  html += '<thead><tr><th style="min-width:90px;border-right:0.5px solid var(--color-border-tertiary);"></th>';
+  labels.forEach(function(l){
+    var short = l.length>10 ? l.slice(0,9)+'…' : l;
+    html += '<th title="'+l+'" style="padding:3px 5px;color:var(--color-text-secondary);font-weight:400;border-bottom:0.5px solid var(--color-border-tertiary);font-size:9px;">'+short+'</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  matrix.forEach(function(row, i) {
+    var lab = labels[i] || ('row'+(i+1));
+    var shortLab = lab.length>14 ? lab.slice(0,13)+'…' : lab;
+    html += '<tr><th title="'+lab+'" style="text-align:right;padding:3px 6px;color:var(--color-text-secondary);font-weight:400;border-right:0.5px solid var(--color-border-tertiary);min-width:90px;">'+shortLab+'</th>';
+    row.forEach(function(v, j) {
+      if (i===j) {
+        html += '<td style="background:var(--color-background-secondary);color:var(--color-text-tertiary);padding:3px 5px;text-align:center;">0</td>';
+      } else {
+        var t = (maxD>minD) ? (v-minD)/(maxD-minD) : 0;
+        var bg = interp(t);
+        html += '<td title="'+labels[i]+' ↔ '+(labels[j]||j)+': '+v.toFixed(4)+'" style="background:'+bg+';padding:3px 5px;text-align:center;font-size:9px;">'+v.toFixed(3)+'</td>';
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+
+  // Legend
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-top:.75rem;font-size:11px;color:var(--color-text-secondary);">';
+  html += '<span>Similar (0)</span>';
+  html += '<div style="width:100px;height:6px;border-radius:3px;background:linear-gradient(to right,#E1F5EE,#085041);"></div>';
+  html += '<span>Distant ('+maxD.toFixed(3)+')</span></div>';
+
+  html += '</div>';
+  container.innerHTML = html;
+  // Track for AI
+  setResultForAI('Distance matrix: '+filename+' | '+n+' sequences | mean='+meanD.toFixed(4)+' max='+maxD.toFixed(4), 'distance_matrix');
+}
+
+// ── Groq API key persistence ─────────────────────────────────────────
+var keySaveTimer = null;
+
+function scheduleKeySave() {
+  clearTimeout(keySaveTimer);
+  keySaveTimer = setTimeout(saveGroqKey, 800);
+}
+
+function saveGroqKey() {
+  var key = document.getElementById('groq-api-key').value.trim();
+  if (!key) return;
+  fetch('/save-setting', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ key: 'groq_api_key', value: key })
+  }).then(function(r){ return r.json(); }).then(function(data){
+    var tag = document.getElementById('key-saved-tag');
+    if (tag) { tag.style.display = 'inline'; setTimeout(function(){ tag.style.display='none'; }, 2000); }
+  }).catch(function(){});
+}
+
+function loadGroqKey() {
+  fetch('/load-setting/groq_api_key')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.value) {
+        var inp = document.getElementById('groq-api-key');
+        if (inp) inp.value = data.value;
+      }
+    }).catch(function(){});
+}
+
+// Load key when AI panel opens
+var _origShowAI = showAIPanel;
+showAIPanel = function() {
+  _origShowAI();
+  loadGroqKey();
+};
+
+// Also load on page ready
+document.addEventListener('DOMContentLoaded', function() {
+  loadGroqKey();
+});
+
+// ── Tensor tab ───────────────────────────────────────────────
+var tensorMode    = 'matrices';
+var tensorRowCount = 2;
+
+function setTensorMode(mode) {
+  tensorMode = mode;
+  document.getElementById('tensor-mode-matrices').classList.toggle('active', mode==='matrices');
+  document.getElementById('tensor-mode-fasta').classList.toggle('active',    mode==='fasta');
+  document.getElementById('tensor-panel-matrices').style.display = mode==='matrices' ? 'block' : 'none';
+  document.getElementById('tensor-panel-fasta').style.display    = mode==='fasta'    ? 'block' : 'none';
+  updateTensorSummary();
+}
+
+function addTensorRow() {
+  var id  = tensorRowCount++;
+  var row = document.createElement('div');
+  row.className = 'tensor-matrix-row';
+  row.id        = 'tmrow-' + id;
+  row.style.cssText = 'display:flex;gap:6px;margin-bottom:5px;';
+  row.innerHTML =
+    '<input type="text" placeholder="matrix.csv or full path" class="tensor-mat-path" data-row="'+id+'" ' +
+    'style="flex:2;font-size:11px;font-family:var(--mono);" oninput="updateTensorSummary()" />' +
+    '<input type="text" placeholder="Label" class="tensor-mat-label" data-row="'+id+'" style="flex:1;font-size:11px;" />' +
+    '<button onclick="removeTensorRow('+id+')" style="background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;padding:0 8px;">✕</button>';
+  document.getElementById('tensor-matrix-rows').appendChild(row);
+  updateTensorSummary();
+}
+
+function removeTensorRow(id) {
+  var el = document.getElementById('tmrow-' + id);
+  if (el) el.remove();
+  updateTensorSummary();
+}
+
+function getMatrixInputs() {
+  var paths  = Array.from(document.querySelectorAll('.tensor-mat-path')).map(function(e){return e.value.trim();}).filter(Boolean);
+  var labels = Array.from(document.querySelectorAll('.tensor-mat-label')).map(function(e){return e.value.trim();});
+  return { paths: paths, labels: labels };
+}
+
+function validateTensorFolder() {
+  var path = document.getElementById('tensor-folder').value.trim();
+  if (!path) return;
+  fetch('/validate-folder', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({folder: path})
+  }).then(function(r){return r.json();}).then(function(d){
+    var el = document.getElementById('tensor-folder-status');
+    if (d.valid) {
+      el.textContent = (d.type==='file'?'1 file':d.count.toLocaleString()+' genomes')+' found';
+      el.className = 'folder-status ok'; el.style.display='block';
+    } else {
+      el.textContent = d.error||'Not found';
+      el.className = 'folder-status err'; el.style.display='block';
+    }
+    updateTensorSummary();
+  });
+}
+
+function updateTensorSummary() {
+  var btn     = document.getElementById('tensor-btn');
+  var summary = document.getElementById('tensor-summary');
+  var fusion  = document.getElementById('tensor-fusion').value;
+
+  if (tensorMode === 'matrices') {
+    var inp = getMatrixInputs();
+    if (inp.paths.length >= 2) {
+      btn.disabled = false;
+      summary.style.color = '#9b72f8';
+      summary.textContent = inp.paths.length + ' layers | fusion=' + fusion
+        + ' | ' + inp.paths.map(function(p){return p.split('/').pop();}).join(', ');
+    } else {
+      btn.disabled = true;
+      summary.style.color = 'var(--muted)';
+      summary.textContent = 'Add at least 2 matrix CSV files to continue';
+    }
+  } else {
+    var folder = document.getElementById('tensor-folder').value.trim();
+    if (folder) {
+      btn.disabled = false;
+      summary.style.color = '#9b72f8';
+      summary.textContent = 'FASTA: ' + folder.split('/').pop()
+        + ' | k=' + (document.getElementById('tensor-k').value||'2 3 4 5')
+        + ' | fusion=' + fusion;
+    } else {
+      btn.disabled = true;
+      summary.style.color = 'var(--muted)';
+      summary.textContent = 'Enter a genome folder to continue';
+    }
+  }
+}
+
+var tensorMeta    = {};  // populated by parseTensorMeta()
+var tensorNameMap = {};  // populated by parseTensorNameMap()
+
+function parseKeyValueFile(text) {
+  var parsed = {};
+  try { return JSON.parse(text); } catch(_) {}
+  text.split(/\r?\n/).forEach(function(line) {
+    line = line.trim();
+    if (!line || line.startsWith('#')) return;
+    var eq  = line.indexOf('=');
+    var tab = line.indexOf('\t');
+    var sep = (eq > 0) ? eq : (tab > 0) ? tab : -1;
+    if (sep < 0) return;
+    var k = line.slice(0, sep).trim();
+    var v = line.slice(sep + 1).trim();
+    if (k) parsed[k] = v;
+  });
+  return parsed;
+}
+
+function parseTensorNameMap(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var status  = document.getElementById('tensor-namemap-status');
+  var preview = document.getElementById('tensor-namemap-preview');
+  var reader  = new FileReader();
+  reader.onload = function(e) {
+    tensorNameMap = parseKeyValueFile(e.target.result.trim());
+    var keys = Object.keys(tensorNameMap);
+    if (keys.length === 0) {
+      status.textContent = 'No valid entries found';
+      status.style.color = '#f05050';
+      preview.style.display = 'none';
+    } else {
+      status.textContent = keys.length + ' genome' + (keys.length > 1 ? 's' : '') + ' mapped';
+      status.style.color = 'var(--teal)';
+      preview.textContent = keys.slice(0, 8).map(function(k){ return k + ' → ' + tensorNameMap[k]; }).join('\n')
+        + (keys.length > 8 ? '\n… and ' + (keys.length - 8) + ' more' : '');
+      preview.style.display = 'block';
+    }
+  };
+  reader.readAsText(file);
+}
+
+var tensorMeta = {};  // populated by parseTensorMeta()
+
+function parseTensorMeta(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var status  = document.getElementById('tensor-meta-status');
+  var preview = document.getElementById('tensor-meta-preview');
+  var reader  = new FileReader();
+  reader.onload = function(e) {
+    var text = e.target.result.trim();
+    var parsed = parseKeyValueFile(text);
+    tensorMeta = parsed;
+    var keys = Object.keys(parsed);
+    if (keys.length === 0) {
+      status.textContent = 'No valid fields found';
+      status.style.color = '#f05050';
+      preview.style.display = 'none';
+    } else {
+      status.textContent = keys.length + ' field' + (keys.length > 1 ? 's' : '') + ' loaded';
+      status.style.color = 'var(--teal)';
+      preview.textContent = keys.map(function(k){ return k+'='+parsed[k]; }).join('  |  ');
+      preview.style.display = 'block';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function runTensor() {
+  var fusion     = document.getElementById('tensor-fusion').value;
+  var labelsCol  = (document.getElementById('tensor-labels-col') || {}).value || '';
+  var btn    = document.getElementById('tensor-btn');
+  btn.disabled = true; btn.textContent = 'Running...';
+
+  var payload;
+
+  if (tensorMode === 'matrices') {
+    var inp    = getMatrixInputs();
+    var labels = inp.labels.map(function(l,i){ return l || ('Layer '+(i+1)); });
+    payload = {
+      mode: 'matrices',
+      matrices: inp.paths,
+      labels:   labels,
+      fusion:   fusion,
+      meta:     tensorMeta,
+      name_map: tensorNameMap,
+      labels_col: labelsCol.trim() || null,
+    };
+  } else {
+    var folder = document.getElementById('tensor-folder').value.trim();
+    var kRaw   = document.getElementById('tensor-k').value.trim()
+                   .split(/\s+/).map(Number).filter(function(n){return n>0;});
+    var bin  = parseInt(document.getElementById('tensor-bin').value)||500;
+    payload = {
+      mode: 'fasta',
+      folder: folder,
+      k: kRaw,
+      bin_size: bin,
+      fusion: fusion,
+      meta:   tensorMeta,
+      name_map: tensorNameMap,
+      labels_col: labelsCol.trim() || null,
+    };
+  }
+
+  fetch('/run-tensor', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(r){return r.json();}).then(function(data){
+    btn.disabled = false; btn.textContent = 'Build distance tensor';
+    if (data.error) { toast(data.error,'error'); return; }
+    currentJobId = data.job_id;
+    showView('log'); clearLog(); setBadge('running','RUNNING');
+    var modeLabel = tensorMode==='matrices'
+      ? getMatrixInputs().paths.length+' layers'
+      : 'k='+payload.k.join(',');
+    document.getElementById('log-title').textContent = 'Tensor | '+modeLabel+' | fusion='+fusion;
+    document.getElementById('progress-wrap').style.display='block';
+    setProgress(0,'Building tensor...');
+    listenSSE(data.job_id);
+    toast('Tensor pipeline running...','success');
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = 'Build distance tensor';
+    toast('Request failed','error');
+  });
+}
+
+
+function runBenchmark() {
+  var folder   = document.getElementById('bench-folder').value.trim();
+  var meta     = document.getElementById('bench-meta').value.trim();
+  var accCol   = document.getElementById('bench-acc-col').value.trim();
+  var labelCol = document.getElementById('bench-label-col').value.trim();
+  var pattern  = document.getElementById('bench-pattern').value.trim();
+  var holdout  = document.getElementById('bench-holdout').value.trim();
+  var kStr     = document.getElementById('bench-k').value.trim();
+  var krakenDb = document.getElementById('bench-kraken-db').value.trim();
+  var output   = document.getElementById('bench-output').value.trim() || 'results/benchmark';
+
+  if (!folder || !meta) { alert('Genome folder and metadata are required'); return; }
+
+  var params = {
+    command: 'benchmark',
+    genomes: folder,
+    metadata: meta,
+    accession_col: accCol,
+    label_col: labelCol,
+    file_pattern: pattern,
+    holdout: parseFloat(holdout) || 0.4,
+    k: kStr.split(/\s+/).map(Number).filter(Boolean),
+    kraken_db: krakenDb || null,
+    output: output,
+  };
+
+  showView('log'); clearLog(); setBadge('running', 'RUNNING');
+  fetch('/run_classify', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(params)
+  }).catch(function(e) { appendLog('Error: ' + e.message); });
+}
+
+function runRFDistance() {
+  var kaliTree = document.getElementById('rf-kali-tree').value.trim();
+  var refTree  = document.getElementById('rf-ref-tree').value.trim();
+  var output   = document.getElementById('rf-output').value.trim() || 'results/rf_comparison';
+
+  if (!kaliTree || !refTree) { alert('Both tree files are required'); return; }
+
+  var params = {
+    command: 'rf_distance',
+    trees: [kaliTree, refTree],
+    output: output,
+  };
+
+  showView('log'); clearLog(); setBadge('running', 'RUNNING');
+  fetch('/run_classify', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(params)
+  }).catch(function(e) { appendLog('Error: ' + e.message); });
+}
+
+document.getElementById('htab-tensor').addEventListener('click', function() {
+  updateTensorSummary();
+});
+
+// ── Download tab ─────────────────────────────────────────────
+var dlMode      = 'browse';
+var dlTaxon     = '';
+var dlTaxid     = '';
+var dlKingdom   = 'virus';
+var selectedTaxa = {};  // {key: {label, txid}}
+
+// Predefined taxonomy tree (txid, label, children or leaf)
+var TAXONOMY = {
+  virus: [
+    { label:'Flaviviridae', txid:'11050', children:[
+      { label:'Hepacivirus (HCV)', txid:'11102' },
+      { label:'Pegivirus', txid:'1239565' },
+      { label:'Pestivirus (BVDV)', txid:'11099' },
+      { label:'Orthoflavivirus (Dengue, Zika, WNV...)', txid:'11234' },
+    ]},
+    { label:'Coronaviridae', txid:'11118', children:[
+      { label:'SARS-CoV-2 / Betacoronavirus', txid:'694002' },
+      { label:'Alphacoronavirus', txid:'693996' },
+    ]},
+    { label:'Retroviridae (HIV, HTLV...)', txid:'11632', children:[
+      { label:'HIV-1 (Lentivirus)', txid:'11676' },
+      { label:'HIV-2', txid:'11709' },
+      { label:'HTLV', txid:'11908' },
+    ]},
+    { label:'Poxviridae', txid:'10240', children:[
+      { label:'Orthopoxvirus (Vaccinia, Monkeypox)', txid:'10242' },
+      { label:'Parapoxvirus (Orf virus)', txid:'10254' },
+      { label:'Avipoxvirus', txid:'10255' },
+    ]},
+    { label:'Orthomyxoviridae (Influenza)', txid:'11308', children:[
+      { label:'Influenza A', txid:'11320' },
+      { label:'Influenza B', txid:'11520' },
+    ]},
+    { label:'Filoviridae (Ebola, Marburg)', txid:'11266', children:[
+      { label:'Ebolavirus', txid:'186536' },
+      { label:'Marburgvirus', txid:'186540' },
+    ]},
+    { label:'Herpesviridae', txid:'10292', children:[
+      { label:'HSV-1 / Alphaherpesvirinae', txid:'10293' },
+      { label:'CMV / Betaherpesvirinae', txid:'10357' },
+      { label:'EBV / Gammaherpesvirinae', txid:'10375' },
+    ]},
+    { label:'Papillomaviridae (HPV)', txid:'151340' },
+    { label:'Hepadnaviridae (HBV)', txid:'10404' },
+    { label:'Reoviridae (Rotavirus)', txid:'10880' },
+    { label:'Bunyavirales', txid:'1980521' },
+    { label:'Togaviridae (Chikungunya)', txid:'11018' },
+  ],
+  bacteria: [
+    { label:'Enterobacteriaceae', txid:'543', children:[
+      { label:'Escherichia coli', txid:'562' },
+      { label:'Salmonella', txid:'590' },
+      { label:'Shigella', txid:'620' },
+      { label:'Klebsiella', txid:'570' },
+    ]},
+    { label:'Mycobacterium', txid:'1763', children:[
+      { label:'M. tuberculosis complex', txid:'77643' },
+      { label:'M. leprae', txid:'1769' },
+    ]},
+    { label:'Staphylococcus', txid:'1279', children:[
+      { label:'S. aureus (MRSA)', txid:'1280' },
+      { label:'S. epidermidis', txid:'1282' },
+    ]},
+    { label:'Streptococcus', txid:'1301', children:[
+      { label:'S. pneumoniae', txid:'1313' },
+      { label:'S. pyogenes', txid:'1314' },
+    ]},
+    { label:'Pseudomonas aeruginosa', txid:'287' },
+    { label:'Clostridiaceae (C. diff)', txid:'31979' },
+    { label:'Helicobacter pylori', txid:'210' },
+    { label:'Bacillus', txid:'1386', children:[
+      { label:'B. subtilis', txid:'1423' },
+      { label:'B. anthracis', txid:'1392' },
+    ]},
+    { label:'Neisseria', txid:'482', children:[
+      { label:'N. gonorrhoeae', txid:'485' },
+      { label:'N. meningitidis', txid:'487' },
+    ]},
+    { label:'Listeria monocytogenes', txid:'1639' },
+  ],
+  archaea: [
+    { label:'Methanobacteriota', txid:'28890' },
+    { label:'Halobacteria', txid:'183963' },
+    { label:'Thermococcus', txid:'2263' },
+    { label:'Sulfolobales', txid:'2281' },
+  ]
+};
+
+function renderSelectedBadges() {
+  var container = document.getElementById('selected-badges');
+  if (!container) return;
+  var keys = Object.keys(selectedTaxa);
+  if (keys.length === 0) {
+    container.innerHTML = '<span style="color:var(--muted);font-size:10px;">None selected</span>';
+    return;
+  }
+  container.innerHTML = keys.map(function(k) {
+    var t = selectedTaxa[k];
+    return '<span class="example-chip" style="border-color:var(--teal);color:var(--teal);" '
+      + 'onclick="removeTaxon(\'' + k + '\')">' + t.label + ' ✕</span>';
+  }).join('');
+}
+
+function removeTaxon(key) {
+  delete selectedTaxa[key];
+  renderSelectedBadges();
+  renderTree(TAXONOMY[dlKingdom], document.getElementById('tax-tree'), 0);
+  updateDlRunSummary();
+}
+
+function setDlMode(mode) {
+  dlMode = mode;
+  ['browse','search','acc'].forEach(function(m) {
+    document.getElementById('dlmode-'+m).classList.toggle('active', m===mode);
+    document.getElementById('dl-panel-'+m).style.display = m===mode ? 'block' : 'none';
+  });
+  updateDlRunSummary();
+}
+
+function loadKingdom(kingdom) {
+  dlKingdom = kingdom;
+  ['virus','bacteria','archaea'].forEach(function(k) {
+    document.getElementById('bk-'+k).classList.toggle('active', k===kingdom);
+  });
+  renderTree(TAXONOMY[kingdom], document.getElementById('tax-tree'), 0);
+}
+
+function renderTree(nodes, container, depth) {
+  container.innerHTML = '';
+  nodes.forEach(function(node) {
+    var item = document.createElement('div');
+    item.style.paddingLeft = (depth * 18) + 'px';
+    item.style.marginBottom = '3px';
+    item.style.cursor = 'pointer';
+
+    var arrow = node.children ? (node._open ? '▼ ' : '▶ ') : '○ ';
+    var key      = node.txid || node.label;
+    var isSelected = !!(selectedTaxa[key]);
+    var color    = isSelected ? 'var(--teal)' : 'var(--text)';
+    var check    = (!node.children && isSelected) ? ' ✓' : '';
+    item.innerHTML = '<span style="color:' + color + ';user-select:none;">'
+      + arrow + node.label + check
+      + (node.txid ? ' <span style="color:var(--muted);font-size:10px;">[txid:'+node.txid+']</span>' : '')
+      + '</span>';
+
+    item.onclick = function(e) {
+      e.stopPropagation();
+      if (node.children) {
+        node._open = !node._open;
+        renderTree(TAXONOMY[dlKingdom], container, 0);
+      } else {
+        // Toggle selection
+        var key = node.txid || node.label;
+        if (selectedTaxa[key]) {
+          delete selectedTaxa[key];
+        } else {
+          selectedTaxa[key] = {label: node.label, txid: node.txid || ''};
+        }
+        dlTaxon = node.label;
+        dlTaxid = node.txid || '';
+        renderTree(TAXONOMY[dlKingdom], container, 0);
+        updateDlRunSummary();
+        renderSelectedBadges();
+      }
+    };
+
+    container.appendChild(item);
+
+    if (node.children && node._open) {
+      var sub = document.createElement('div');
+      container.appendChild(sub);
+      renderTree(node.children, sub, depth+1);
+    }
+  });
+}
+
+function setTaxon(name) {
+  dlTaxon = name;
+  dlTaxid = '';
+  document.getElementById('dl-search-input').value = name;
+  updateDlRunSummary();
+  checkCountAuto();
+}
+
+function checkCountAuto() {
+  if (!dlTaxon && !dlTaxid) return;
+  var complete = document.getElementById('dl-complete').checked;
+  fetch('/ncbi-count', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({taxon: dlTaxon, taxid: dlTaxid, complete: complete})
+  }).then(function(r){return r.json();}).then(function(d){
+    var el = document.getElementById('dl-count-info');
+    if (el) {
+      el.textContent = d.error ? d.error
+        : d.count + ' sequences available on NCBI';
+      el.style.color = d.error ? 'var(--red)' : 'var(--teal)';
+    }
+    updateDlRunSummary();
+  }).catch(function(){});
+}
+
+function checkCount() {
+  var inp = document.getElementById('dl-search-input');
+  if (inp && inp.value.trim()) {
+    dlTaxon = inp.value.trim();
+    dlTaxid = '';
+  }
+  checkCountAuto();
+}
+
+function updateDlRunSummary() {
+  var btn     = document.getElementById('dl-run-btn');
+  var summary = document.getElementById('dl-run-summary');
+
+  var hasInput = false;
+  if (dlMode === 'browse' || dlMode === 'search') {
+    hasInput = !!(dlTaxon || dlTaxid || Object.keys(selectedTaxa).length > 0);
+  } else {
+    var acc = document.getElementById('dl-acc-input');
+    hasInput = acc && acc.value.trim().length > 0;
+  }
+
+  if (hasInput) {
+    btn.disabled = false;
+    summary.style.color = 'var(--teal)';
+    var keys = Object.keys(selectedTaxa);
+    var what = keys.length > 1
+      ? keys.length + ' taxa selected — will merge into one Excel'
+      : (keys.length === 1 ? selectedTaxa[keys[0]].label : dlTaxon || ('txid:'+dlTaxid));
+    var lim  = document.getElementById('dl-limit').value || '100';
+    summary.textContent = 'Download up to ' + lim + ' per taxon from: ' + what;
+  } else {
+    btn.disabled = true;
+    summary.style.color = 'var(--muted)';
+    summary.textContent = 'Select a taxon or paste accessions to continue';
+  }
+}
+
+function runDownload() {
+  var limit    = parseInt(document.getElementById('dl-limit').value) || 100;
+  var prefix   = document.getElementById('dl-prefix').value.trim() || 'genome';
+  var complete = document.getElementById('dl-complete').checked;
+  var btn      = document.getElementById('dl-run-btn');
+  var payload  = {limit: limit, prefix: prefix, complete: complete,
+                  taxon: '', taxid: '', accessions: []};
+
+  if (dlMode === 'browse' || dlMode === 'search') {
+    var keys = Object.keys(selectedTaxa);
+    if (keys.length > 1) {
+      // Multiple selected — send as taxons list
+      payload.taxons = keys.map(function(k){ return selectedTaxa[k].label; });
+      payload.taxids = keys.map(function(k){ return selectedTaxa[k].txid; }).filter(Boolean);
+    } else if (keys.length === 1) {
+      payload.taxon = selectedTaxa[keys[0]].label;
+      payload.taxid = selectedTaxa[keys[0]].txid;
+    } else {
+      // fallback to text input
+      payload.taxon = dlTaxon;
+      payload.taxid = dlTaxid;
+    }
+  } else {
+    var raw = document.getElementById('dl-acc-input').value.trim();
+    payload.accessions = raw.split(/[\n,\s]+/).map(function(a){return a.trim();}).filter(Boolean);
+  }
+
+  if (!payload.taxon && !payload.taxid &&
+      !(payload.taxons && payload.taxons.length) &&
+      !payload.accessions.length) {
+    toast('Please select at least one taxon from the tree first', 'error'); return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Downloading...';
+
+  fetch('/download-genome', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(r){return r.json();}).then(function(data){
+    btn.disabled = false; btn.textContent = 'Download genomes + Excel metadata';
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentJobId = data.job_id;
+    showView('log'); clearLog(); setBadge('running','RUNNING');
+    var what = payload.taxon || payload.taxid || payload.accessions.length + ' accessions';
+    document.getElementById('log-title').textContent = 'Download | ' + what;
+    document.getElementById('progress-wrap').style.display = 'block';
+    setProgress(0, 'Connecting to NCBI...');
+    listenSSE(data.job_id);
+    toast('NCBI download started...', 'success');
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = 'Download genomes + Excel metadata';
+    toast('Request failed', 'error');
+  });
+}
+
+// ── MASH comparison tab ──────────────────────────────────────
+function validateMashFolder() {
+  var path = document.getElementById('mash-folder').value.trim();
+  if (!path) return;
+  fetch('/validate-folder', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({folder: path})
+  }).then(function(r){return r.json();}).then(function(d){
+    var el = document.getElementById('mash-folder-status');
+    if (d.valid) {
+      el.textContent = (d.type==='file' ? '1 file' : d.count+' genomes') + ' found';
+      el.className = 'folder-status ok'; el.style.display = 'block';
+    } else {
+      el.textContent = d.error || 'Not found';
+      el.className = 'folder-status err'; el.style.display = 'block';
+    }
+    updateMashSummary();
+  });
+}
+
+function updateMashSummary() {
+  var folder = document.getElementById('mash-folder').value.trim();
+  var btn    = document.getElementById('mash-btn');
+  var summary= document.getElementById('mash-summary');
+  if (folder) {
+    btn.disabled = false;
+    summary.style.color = '#f5a623';
+    summary.textContent = 'Input: ' + folder.split('/').pop()
+      + ' | k=' + document.getElementById('mash-k').value.trim()
+      + ' | MASH k=' + document.getElementById('mash-kmer').value.trim();
+  } else {
+    btn.disabled = true;
+    summary.style.color = 'var(--muted)';
+    summary.textContent = 'Enter genome folder to continue';
+  }
+}
+
+function runMash() {
+  var folder  = document.getElementById('mash-folder').value.trim();
+  var kRaw    = document.getElementById('mash-k').value.trim().split(/\s+/).map(Number).filter(function(n){return n>0;});
+  var bin   = parseInt(document.getElementById('mash-bin').value) || 500;
+  var sketch  = parseInt(document.getElementById('mash-sketch').value) || 10000;
+  var mashK   = parseInt(document.getElementById('mash-kmer').value) || 21;
+  var meta    = document.getElementById('mash-meta').value.trim();
+  var btn     = document.getElementById('mash-btn');
+
+  btn.disabled = true; btn.textContent = 'Running...';
+
+  fetch('/run-mash', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      folder: folder, k: kRaw, bin_size: bin,
+      sketch_size: sketch, mash_k: mashK, metadata: meta
+    })
+  }).then(function(r){return r.json();}).then(function(data){
+    btn.disabled = false; btn.textContent = 'Run KALI vs MASH comparison';
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentJobId = data.job_id;
+    showView('log'); clearLog(); setBadge('running','RUNNING');
+    document.getElementById('log-title').textContent =
+      'MASH comparison | ' + folder.split('/').pop();
+    document.getElementById('progress-wrap').style.display = 'block';
+    setProgress(0, 'Sketching genomes with MASH...');
+    listenSSE(data.job_id);
+    toast('MASH comparison running...', 'success');
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = 'Run KALI vs MASH comparison';
+    toast('Request failed', 'error');
+  });
+}
+
+document.getElementById('htab-mash').addEventListener('click', function() {
+  updateMashSummary();
+});
+
+document.getElementById('htab-download').addEventListener('click', function() {
+  loadKingdom('virus');
+  updateDlRunSummary();
+});
+
+// ── Outbreak tab ─────────────────────────────────────────────
+var outbreakMode = 'watch';
+
+function setOutbreakMode(mode) {
+  outbreakMode = mode;
+  document.getElementById('ob-mode-watch').classList.toggle('active', mode === 'watch');
+  document.getElementById('ob-mode-single').classList.toggle('active', mode === 'single');
+  document.getElementById('ob-input-watch').style.display  = mode === 'watch'  ? 'block' : 'none';
+  document.getElementById('ob-input-single').style.display = mode === 'single' ? 'block' : 'none';
+  updateOutbreakSummary();
+}
+
+function validateOutbreakFolder() {
+  var path = document.getElementById('outbreak-inbox').value.trim();
+  if (!path) return;
+  fetch('/validate-folder', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({folder: path})
+  }).then(function(r){return r.json();}).then(function(d){
+    var el = document.getElementById('outbreak-folder-status');
+    if (d.valid) {
+      el.textContent = 'Folder ready — watching for new FASTA files';
+      el.className = 'folder-status ok'; el.style.display = 'block';
+    } else {
+      el.textContent = d.error || 'Folder not found';
+      el.className = 'folder-status err'; el.style.display = 'block';
+    }
+    updateOutbreakSummary();
+  });
+}
+
+function populateOutbreakModels() {
+  fetch('/models').then(function(r){return r.json();}).then(function(d){
+    var sel = document.getElementById('outbreak-model');
+    var cur = sel.value;
+    while (sel.options.length > 1) sel.remove(1);
+    (d.models || []).forEach(function(m) {
+      var opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      sel.appendChild(opt);
+    });
+    if (cur) sel.value = cur;
+  }).catch(function(){});
+}
+
+function updateOutbreakSummary() {
+  var btn     = document.getElementById('outbreak-btn');
+  var summary = document.getElementById('outbreak-summary');
+  var hasInput = outbreakMode === 'watch'
+    ? document.getElementById('outbreak-inbox').value.trim()
+    : document.getElementById('outbreak-single').value.trim();
+  if (hasInput) {
+    btn.disabled = false;
+    summary.style.color = '#f05050';
+    summary.textContent = (outbreakMode === 'watch' ? 'Watch: ' : 'Process: ')
+      + hasInput.split('/').pop();
+  } else {
+    btn.disabled = true;
+    summary.style.color = 'var(--muted)';
+    summary.textContent = 'Set an inbox folder or single file to continue';
+  }
+}
+
+function runOutbreak() {
+  var inbox   = document.getElementById('outbreak-inbox').value.trim();
+  var single  = document.getElementById('outbreak-single').value.trim();
+  var model   = document.getElementById('outbreak-model').value;
+  var kRaw    = document.getElementById('outbreak-k').value.trim().split(/\s+/).map(Number).filter(function(n){return n>0;});
+  var bin   = parseInt(document.getElementById('outbreak-bin').value) || 500;
+  var z       = parseFloat(document.getElementById('outbreak-z').value) || 2.0;
+  var btn     = document.getElementById('outbreak-btn');
+  btn.disabled = true; btn.textContent = 'Starting...';
+
+  fetch('/run-outbreak', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      inbox: outbreakMode === 'watch' ? inbox : '',
+      single_file: outbreakMode === 'single' ? single : '',
+      model: model, k: kRaw, bin_size: bin, z_threshold: z
+    })
+  }).then(function(r){return r.json();}).then(function(data){
+    btn.disabled = false; btn.textContent = 'Start surveillance';
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentJobId = data.job_id;
+    showView('log'); clearLog(); setBadge('running','RUNNING');
+    document.getElementById('log-title').textContent =
+      outbreakMode === 'watch' ? 'Outbreak | watching ' + (inbox.split('/').pop() || inbox)
+                               : 'Outbreak | processing ' + (single.split('/').pop() || single);
+    document.getElementById('progress-wrap').style.display = 'block';
+    setProgress(0, outbreakMode === 'watch' ? 'Watching for new genomes...' : 'Processing genome...');
+    listenSSE(data.job_id);
+    toast('Outbreak pipeline started', 'success');
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = 'Start surveillance';
+    toast('Request failed', 'error');
+  });
+}
+
+document.getElementById('htab-outbreak').addEventListener('click', function() {
+  populateOutbreakModels();
+  updateOutbreakSummary();
+});
+
+// ── Prepare metadata ─────────────────────────────────────────
+function runPrepareMetadata() {
+  var inputs    = document.getElementById('prep-meta-input').value.trim();
+  var labelCol  = document.getElementById('prep-label-col').value;
+  var minLen    = parseInt(document.getElementById('prep-min-length').value) || 0;
+  var statusEl  = document.getElementById('prep-meta-status');
+
+  if (!inputs) { toast('Enter a metadata file path', 'error'); return; }
+
+  statusEl.style.display = 'block';
+  statusEl.textContent   = 'Preparing metadata...';
+
+  fetch('/prepare-metadata', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      inputs:     inputs.split(/[,\s]+/).map(function(s){return s.trim();}).filter(Boolean),
+      label_col:  labelCol,
+      min_length: minLen,
+      output:     inputs.replace(/\.(xlsx|csv)$/i, '_labels.csv').replace('.xls','_labels.csv')
+    })
+  }).then(function(r){return r.json();}).then(function(data){
+    if (data.error) {
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = data.error;
+      return;
+    }
+    currentJobId = data.job_id;
+    showView('log'); clearLog(); setBadge('running','RUNNING');
+    document.getElementById('log-title').textContent = 'Prepare metadata';
+    document.getElementById('progress-wrap').style.display = 'block';
+    setProgress(0, 'Fixing metadata...');
+    listenSSE(data.job_id);
+    // Pre-fill the training metadata field with the output path
+    var trainMeta = document.getElementById('train-meta');
+    if (trainMeta && data.output) { trainMeta.value = data.output; }
+    toast('Metadata prepared — labels CSV ready for training', 'success');
+  }).catch(function(){
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Request failed';
+  });
+}
+
+// ── HGT tab ─────────────────────────────────────────────────────
+function validateHgtFolder() {
+  var path = document.getElementById('hgt-folder').value.trim();
+  if (!path) { return; }
+  fetch('/validate-folder', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder: path })
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    var el = document.getElementById('hgt-folder-status');
+    if (d.valid) {
+      el.textContent = 'Found ' + d.count.toLocaleString() + ' genome files';
+      el.className = 'folder-status ok'; el.style.display = 'block';
+    } else {
+      el.textContent = d.error || 'Path not found';
+      el.className = 'folder-status err'; el.style.display = 'block';
+    }
+    updateHgtSummary();
+  });
+}
+
+function updateHgtUploadInfo() {
+  var el = document.getElementById('hgt-upload-info');
+  if (!el) { return; }
+  el.textContent = uploadedFiles.length
+    ? uploadedFiles.length + ' file(s): ' + uploadedFiles.slice(0,3).join(', ')
+    : 'No files uploaded yet';
+  updateHgtSummary();
+}
+
+function updateHgtSummary() {
+  var folder  = document.getElementById('hgt-folder').value.trim();
+  var btn     = document.getElementById('hgt-btn');
+  var summary = document.getElementById('hgt-summary');
+  var z       = parseFloat(document.getElementById('hgt-z').value) || 2.5;
+  var bin   = parseInt(document.getElementById('hgt-bin').value) || 5000;
+  var info    = document.getElementById('hgt-param-info');
+
+  var pct = z <= 2.0 ? '~5%' : z <= 2.5 ? '~2%' : z <= 3.0 ? '~0.5%' : '<0.1%';
+  info.textContent = 'z=' + z + ' flags ~' + pct + ' of bins by chance | bin=' + bin.toLocaleString() + ' bp';
+
+  var hasInput = folder || uploadedFiles.length > 0;
+  var checkedOrgs = Array.from(document.querySelectorAll('input[name="hgt-org"]:checked'))
+                         .map(function(cb) { return cb.value || 'Generic'; });
+  var orgLabel = checkedOrgs.length === 0 ? 'none selected'
+               : checkedOrgs.length <= 2  ? checkedOrgs.join(', ')
+               : checkedOrgs.length + ' organisms';
+  if (hasInput) {
+    btn.disabled = false;
+    summary.style.color = 'var(--amber)';
+    var target = folder ? folder.split('/').pop() : uploadedFiles.length + ' file(s)';
+    summary.textContent = 'Analyse: ' + target + ' | AMR: ' + orgLabel;
+  } else {
+    btn.disabled = true;
+    summary.style.color = 'var(--muted)';
+    summary.textContent = 'Enter a genome path or upload files to continue';
+  }
+}
+
+function setHgtPreset(type) {
+  if (type === 'virus') {
+    document.getElementById('hgt-k').value     = '3 4';
+    document.getElementById('hgt-bin').value = '500';
+    document.getElementById('hgt-z').value     = '2.0';
+    document.getElementById('hgt-min').value   = '500';
+  } else if (type === 'bacteria') {
+    document.getElementById('hgt-k').value     = '3 4';
+    document.getElementById('hgt-bin').value = '5000';
+    document.getElementById('hgt-z').value     = '2.5';
+    document.getElementById('hgt-min').value   = '5000';
+  } else if (type === 'large') {
+    document.getElementById('hgt-k').value     = '3 4';
+    document.getElementById('hgt-bin').value = '1000';
+    document.getElementById('hgt-z').value     = '2.5';
+    document.getElementById('hgt-min').value   = '1000';
+  }
+  updateHgtSummary();
+  toast('Preset applied', 'success');
+}
+
+function runHgt() {
+  var folder  = document.getElementById('hgt-folder').value.trim();
+  var kRaw    = document.getElementById('hgt-k').value.trim().split(/\s+/).map(Number).filter(function(n){ return n > 0; });
+  var bin   = parseInt(document.getElementById('hgt-bin').value) || 5000;
+  var z       = parseFloat(document.getElementById('hgt-z').value) || 2.5;
+  var minIsl  = parseInt(document.getElementById('hgt-min').value) || 5000;
+  var summary = document.getElementById('hgt-summary-check').checked;
+  var btn     = document.getElementById('hgt-btn');
+  var organisms = Array.from(document.querySelectorAll('input[name="hgt-org"]:checked'))
+                       .map(function(cb) { return cb.value; });
+
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+
+  fetch('/run-hgt', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      folder: folder, files: folder ? [] : uploadedFiles,
+      k: kRaw, bin_size: bin, z_threshold: z, min_island: minIsl,
+      summary: summary,
+      amr_path: (document.getElementById('hgt-amr-path')||{}).value||''  , organisms: organisms
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    btn.disabled = false;
+    btn.textContent = 'Detect genomic islands';
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentJobId = data.job_id;
+    showView('log');
+    clearLog();
+    setBadge('running', 'RUNNING');
+    document.getElementById('log-title').textContent = 'HGT detector | k=' + kRaw.join(',') + ' bin=' + bin;
+    document.getElementById('progress-wrap').style.display = 'block';
+    setProgress(0, 'Scanning genome bins...');
+    listenSSE(data.job_id);
+    toast('HGT detection running...', 'success');
+  }).catch(function() {
+    btn.disabled = false;
+    btn.textContent = 'Detect genomic islands';
+    toast('Request failed', 'error');
+  });
+}
+
+document.getElementById('htab-hgt').addEventListener('click', function() {
+  updateHgtUploadInfo();
+  updateHgtSummary();
+});
+
+// ── Classify tab ────────────────────────────────────────────────
+var selectedModel = '';
+var classifyMode  = 'single';
+
+function setClassifyMode(mode) {
+  classifyMode = mode;
+  document.getElementById('mode-single').classList.toggle('active',   mode === 'single');
+  document.getElementById('mode-folder').classList.toggle('active',   mode === 'folder');
+  document.getElementById('mode-uploaded').classList.toggle('active', mode === 'uploaded');
+  document.getElementById('classify-input-single').style.display   = mode === 'single'   ? 'block' : 'none';
+  document.getElementById('classify-input-folder').style.display   = mode === 'folder'   ? 'block' : 'none';
+  document.getElementById('classify-input-uploaded').style.display = mode === 'uploaded' ? 'block' : 'none';
+  updateClassifySummary();
+}
+
+function handleClassifySingleBrowse(input) {
+  if (!input.files || !input.files[0]) { return; }
+  var file = input.files[0];
+  document.getElementById('classify-single-path').value = file.name;
+  document.getElementById('classify-single-path').dataset.browsed = '1';
+  var status = document.getElementById('classify-single-status');
+  status.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+  status.className = 'folder-status ok';
+  status.style.display = 'block';
+  window._classifyBrowsedFile = file;
+  updateClassifySummary();
+}
+
+function refreshModels() {
+  fetch('/models').then(function(r) { return r.json(); }).then(function(d) {
+    var el = document.getElementById('model-list');
+    if (!d.models || !d.models.length) {
+      el.innerHTML = '<div class="model-none">No .pkl models found in models/ folder</div>';
+      return;
+    }
+    var html = '';
+    d.models.forEach(function(m) {
+      var sel = m === selectedModel ? ' selected' : '';
+      html += '<div class="model-item' + sel + '" onclick="selectModel(\'' + m + '\')">';
+      html += '<div class="model-dot"></div><div class="model-name">' + m + '</div></div>';
+    });
+    el.innerHTML = html;
+  }).catch(function() {});
+}
+
+function selectModel(name) {
+  selectedModel = name;
+  refreshModels();
+  updateClassifySummary();
+}
+
+function validateClassifyFolder() {
+  var path = document.getElementById('classify-folder').value.trim();
+  if (!path) { return; }
+  fetch('/validate-folder', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder: path })
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    var el = document.getElementById('classify-folder-status');
+    if (d.valid) {
+      el.textContent = 'Found ' + d.count.toLocaleString() + ' genome files';
+      el.className = 'folder-status ok'; el.style.display = 'block';
+    } else {
+      el.textContent = d.error || 'Folder not found';
+      el.className = 'folder-status err'; el.style.display = 'block';
+    }
+    updateClassifySummary();
+  });
+}
+
+function updateClassifyUploadInfo() {
+  var el = document.getElementById('classify-upload-info');
+  if (!el) { return; }
+  el.textContent = uploadedFiles.length
+    ? uploadedFiles.length + ' file(s): ' + uploadedFiles.slice(0,3).join(', ') + (uploadedFiles.length > 3 ? '...' : '')
+    : 'No files uploaded yet - upload in the Run tab first';
+  updateClassifySummary();
+}
+
+function updateClassifySummary() {
+  var btn     = document.getElementById('classify-btn');
+  var summary = document.getElementById('classify-summary');
+  if (!btn) { return; }
+  var hasInput = false;
+  var inputDesc = '';
+  if (classifyMode === 'single') {
+    var p = document.getElementById('classify-single-path').value.trim();
+    hasInput  = p.length > 0;
+    inputDesc = hasInput ? '1 file: ' + p.split('/').pop() : 'Enter or browse a file path';
+  } else if (classifyMode === 'folder') {
+    var f = document.getElementById('classify-folder').value.trim();
+    hasInput  = f.length > 0;
+    inputDesc = hasInput ? 'Folder: ' + f : 'Enter a folder path';
+  } else {
+    hasInput  = uploadedFiles.length > 0;
+    inputDesc = hasInput ? uploadedFiles.length + ' uploaded file(s)' : 'No files uploaded yet';
+  }
+  if (selectedModel && hasInput) {
+    btn.disabled = false;
+    summary.style.color = 'var(--teal)';
+    summary.textContent = 'Model: ' + selectedModel + ' | ' + inputDesc;
+  } else {
+    btn.disabled = true;
+    summary.style.color = 'var(--muted)';
+    summary.textContent = !selectedModel ? 'Select a model first' : inputDesc;
+  }
+}
+
+function runClassify() {
+  var btn = document.getElementById('classify-btn');
+  btn.disabled = true;
+  btn.textContent = 'Classifying...';
+  var payload = { model: selectedModel, files: [], folder: '', single_file: '' };
+
+  if (classifyMode === 'single') {
+    var singlePath = document.getElementById('classify-single-path').value.trim();
+    if (window._classifyBrowsedFile) {
+      var formData = new FormData();
+      formData.append('files', window._classifyBrowsedFile);
+      fetch('/upload', { method: 'POST', body: formData })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var uploaded = d.files || [];
+          // Use single_file path so classifier only processes this one file
+          if (uploaded.length === 1) {
+            payload.single_file = uploaded[0];  // just filename — app.py prepends UPLOAD_DIR
+          } else {
+            payload.files = uploaded;
+          }
+          window._classifyBrowsedFile = null;
+          doClassifyRequest(payload, btn);
+        });
+      return;
+    }
+    payload.single_file = singlePath;
+  } else if (classifyMode === 'folder') {
+    payload.folder = document.getElementById('classify-folder').value.trim();
+  } else {
+    payload.files = uploadedFiles;
+  }
+  doClassifyRequest(payload, btn);
+}
+
+function doClassifyRequest(payload, btn) {
+  fetch('/classify', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    btn.disabled = false;
+    btn.textContent = 'Classify sequences';
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentJobId = data.job_id;
+    showView('log');
+    clearLog();
+    setBadge('running', 'RUNNING');
+    document.getElementById('log-title').textContent = 'Classify | ' + selectedModel;
+    document.getElementById('progress-wrap').style.display = 'block';
+    setProgress(0, 'Running classifier...');
+    listenSSE(data.job_id);
+    toast('Classifier running...', 'success');
+  }).catch(function() {
+    btn.disabled = false;
+    btn.textContent = 'Classify sequences';
+    toast('Request failed', 'error');
+  });
+}
+
+
+function runTrain(mode) {
+  var folder      = document.getElementById('train-folder').value.trim();
+  var meta        = document.getElementById('train-meta').value.trim();
+  var accCol      = document.getElementById('train-acc-col').value.trim();
+  var labelCol    = document.getElementById('train-label-col').value.trim();
+  var pattern     = document.getElementById('train-pattern').value.trim();
+  var modelName   = document.getElementById('train-model-name').value.trim() || 'model';
+  var kRaw        = document.getElementById('train-k').value.trim().split(/\s+/).map(Number).filter(function(n) { return n > 0; });
+  var bins        = parseInt(document.getElementById('train-bins') ? document.getElementById('train-bins').value : 50) || 50;
+  var featureMode  = document.getElementById('train-feature-mode') ? document.getElementById('train-feature-mode').value : 'hybrid';
+  var spacingBins  = parseInt(document.getElementById('train-KALI_hash-bins') ? document.getElementById('train-KALI_hash-bins').value : 50) || 50;
+  var trees        = parseInt(document.getElementById('train-trees') ? document.getElementById('train-trees').value : 500) || 500;
+
+  if (!folder) { toast('Enter genome folder path', 'error'); return; }
+  if (!meta)   { toast('Enter metadata filename', 'error'); return; }
+
+  fetch('/train-classifier', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      folder: folder, metadata: meta, accession_col: accCol,
+      label_col: labelCol, file_pattern: pattern,
+      model_name: modelName, k: kRaw, mode: mode,
+      bins: bins, feature_mode: featureMode, trees: trees,
+      KALI_hash_bins: spacingBins
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentJobId = data.job_id;
+    showView('log');
+    clearLog();
+    setBadge('running', 'RUNNING');
+    document.getElementById('log-title').textContent = (mode === 'evaluate' ? 'Evaluate' : 'Train') + ' classifier | ' + modelName;
+    document.getElementById('progress-wrap').style.display = 'block';
+    setProgress(0, mode === 'evaluate' ? 'Running cross-validation…' : 'Training model…');
+    listenSSE(data.job_id);
+    toast((mode === 'evaluate' ? 'Evaluation' : 'Training') + ' started', 'success');
+  }).catch(function() { toast('Request failed', 'error'); });
+}
+
+// Load models when classify tab is opened
+document.getElementById('htab-classify').addEventListener('click', function() {
+  refreshModels();
+  updateClassifyUploadInfo();
+});
+
+// ── Mantel plot ───────────────────────────────────────────────────────────────
+function runMantelPlot() {
+  var files    = window._lastMashFiles || [];
+  var kaliFile = files.find(function(f){
+    return f.indexOf('kali_fused') !== -1 || f.indexOf('hash_py') !== -1;
+  });
+  var mashFile = files.find(function(f){ return f.indexOf('_mash.csv') !== -1; });
+
+  if (!kaliFile || !mashFile) {
+    toast('Run MASH comparison first — KALI and MASH matrices not found', 'error');
+    return;
+  }
+
+  var btn = document.getElementById('mantel-btn');
+  btn.disabled = true; btn.textContent = 'Plotting…';
+
+  fetch('/run-mantel-plot', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ kali_file: kaliFile, mash_file: mashFile })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    btn.disabled = false; btn.textContent = '📊 Plot Mantel';
+    if (data.error) { toast(data.error, 'error'); return; }
+    currentJobId = data.job_id;
+    showView('log'); clearLog(); setBadge('running','RUNNING');
+    document.getElementById('log-title').textContent = 'Mantel plot';
+    document.getElementById('progress-wrap').style.display = 'block';
+    setProgress(0,'Running Mantel test (9,999 permutations)...');
+    listenSSE(data.job_id);
+    toast('Mantel plot running...', 'success');
+  })
+  .catch(function(){
+    btn.disabled = false; btn.textContent = '📊 Plot Mantel';
+    toast('Request failed', 'error');
+  });
+}
+function handleTreeCsvDrop(event) {
+  event.preventDefault();
+  var dz = document.getElementById('tree-csv-dropzone');
+  dz.style.borderColor = '';
+  dz.style.color = '';
+  var files = event.dataTransfer.files;
+  if (files.length) uploadTreeCsv(files);
+}
+
+function uploadTreeCsv(files) {
+  if (!files || !files.length) return;
+  var file = files[0];
+  if (!file.name.endsWith('.csv')) {
+    toast('Only .csv files are accepted', 'error');
+    return;
+  }
+
+  var status = document.getElementById('tree-csv-upload-status');
+  status.style.display = 'block';
+  status.style.color   = 'var(--muted)';
+  status.textContent   = 'Uploading ' + file.name + '…';
+
+  var form = new FormData();
+  form.append('files', file);
+
+  fetch('/upload-csv', { method: 'POST', body: form })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        status.style.color = 'var(--red)';
+        status.textContent = data.error;
+        return;
+      }
+      var saved = data.saved[0];
+      status.style.color = 'var(--teal)';
+      status.textContent = '✓ ' + saved + ' ready';
+
+      // Add a tab to the file list so it appears alongside other outputs
+      var tabs = document.getElementById('file-tabs');
+      var existing = tabs.querySelector('[data-file="' + saved + '"]');
+      if (!existing) {
+        var btn = document.createElement('button');
+        btn.className = 'ftab active';
+        btn.setAttribute('data-file', saved);
+        btn.textContent = saved;
+        btn.onclick = function() { previewFile(saved, btn); };
+        // Deactivate other tabs first
+        tabs.querySelectorAll('.ftab').forEach(function(t) { t.classList.remove('active'); });
+        tabs.appendChild(btn);
+        document.getElementById('dl-btn').style.display = 'block';
+      }
+
+      // Select it immediately — enables the Build Tree button
+      var activeTab = tabs.querySelector('[data-file="' + saved + '"]');
+      previewFile(saved, activeTab);
+      toast(saved + ' uploaded and selected', 'success');
+
+      // Switch to Results view so the user can see the file tabs
+      showView('results');
+    })
+    .catch(function() {
+      status.style.color = 'var(--red)';
+      status.textContent = 'Upload failed';
+    });
+}
+
+
+// ── KALI_hash Analysis ────────────────────────────────────────────
+var spacingJobId = null;
+var spacingOutputFile = null;
+
+function validateSpacingFolder() {
+  var folder = document.getElementById('KALI_hash-folder').value.trim();
+  var statusEl = document.getElementById('KALI_hash-folder-status');
+  var summaryEl = document.getElementById('KALI_hash-input-summary');
+  if (!folder) {
+    statusEl.textContent = '';
+    summaryEl.textContent = 'Uses currently uploaded files if no folder is specified.';
+    return;
+  }
+  fetch('/validate-folder', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({folder: folder})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.valid) {
+      statusEl.textContent = '\u2713 ' + d.count + ' genome file(s) found';
+      statusEl.style.color = 'var(--teal)';
+      summaryEl.textContent = 'Will analyse ' + d.count + ' file(s) from: ' + folder;
+    } else {
+      statusEl.textContent = '\u2717 ' + d.error;
+      statusEl.style.color = '#f05050';
+    }
+  });
+}
+
+// Show KALI_hash-bins field only when KALI_hash mode selected in classifier
+document.addEventListener('DOMContentLoaded', function() {
+  var modeSelect = document.getElementById('train-feature-mode');
+  if (modeSelect) {
+    modeSelect.addEventListener('change', function() {
+      var isSpacing = this.value === 'KALI_hash' || this.value === 'KALI_hash_hybrid';
+      var sbField = document.getElementById('train-KALI_hash-bins-field');
+      if (sbField) sbField.style.display = isSpacing ? 'flex' : 'none';
+    });
+  }
+});
+
+function runSpacingAnalysis() {
+  var bins   = parseInt(document.getElementById('KALI_hash-bins').value) || 200;
+  var metric = document.getElementById('KALI_hash-metric').value;
+  var folder = document.getElementById('KALI_hash-folder').value.trim();
+  var files  = (!folder && uploadedFiles.length) ? uploadedFiles : [];
+
+  if (!files.length && !folder) {
+    toast('Upload genome files or enter a folder path first.', 'error');
+    return;
+  }
+
+  var logBox = document.getElementById('KALI_hash-log-box');
+  logBox.style.display = 'block';
+  logBox.textContent = 'Starting KALI_hash analysis...\n';
+  document.getElementById('KALI_hash-results-box').style.display = 'none';
+
+  var kRaw    = document.getElementById('KALI_hash-k').value.trim();
+  var kList   = kRaw.split(/[\s,]+/).map(Number).filter(function(n){ return n > 0; });
+  if (!kList.length) kList = [4];
+  var combine       = document.getElementById('KALI_hash-combine') ? document.getElementById('KALI_hash-combine').checked : false;
+  var combineMethod = document.getElementById('KALI_hash-combine-method') ? document.getElementById('KALI_hash-combine-method').value : 'average';
+
+  fetch('/run-KALI-hash', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({files: files, folder: folder, k: kList, bins: bins,
+                          metric: metric, combine: combine,
+                          combine_method: combineMethod, verbose: true})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.error) { logBox.textContent += 'Error: ' + d.error; return; }
+    spacingJobId = d.job_id;
+    var es = new EventSource('/stream/' + d.job_id);
+    es.addEventListener('log', function(e) {
+      logBox.textContent += e.data + '\n';
+      logBox.scrollTop = logBox.scrollHeight;
+    });
+    es.addEventListener('done', function(e) {
+      es.close();
+      var result = JSON.parse(e.data);
+      var resBox = document.getElementById('KALI_hash-results-box');
+      var filesList = document.getElementById('KALI_hash-files-list');
+      resBox.style.display = 'block';
+      spacingOutputFile = (result.files && result.files.length) ? result.files[0] : null;
+      filesList.innerHTML = (result.files || []).map(function(f) {
+        return '<a href="/download/' + f + '" download style="display:block;font-size:11px;' +
+               'font-family:var(--mono);color:var(--teal);padding:3px 0;">' + f + '</a>';
+      }).join('');
+      toast('KALI_hash analysis complete — ' + (result.files || []).length + ' file(s) saved', 'success');
+      loadJobs();
+    });
+    es.addEventListener('error', function(e) {
+      es.close();
+      logBox.textContent += '\nJob failed: ' + (e.data || 'unknown error');
+      toast('KALI_hash analysis failed', 'error');
+    });
+  })
+  .catch(function(e) { logBox.textContent += 'Network error: ' + e; });
+}
+
+function toggleSpacingCombineMethod() {
+  var cb = document.getElementById('KALI_hash-combine');
+  var mf = document.getElementById('KALI_hash-combine-method-field');
+  if (mf) mf.style.display = (cb && cb.checked) ? 'flex' : 'none';
+}
+
+function buildTreeFromSpacingResult() {
+  if (!spacingOutputFile) {
+    toast('Run KALI_hash analysis first to get a CSV.', 'error');
+    return;
+  }
+  // Load the result into the tree builder
+  var csvStem = spacingOutputFile.replace(/\.csv$/, '');
+  loadJobs();
+  showView('results');
+  toast('Select the KALI_hash CSV in the Results tab and click Build Tree.', 'info');
+}
+
+</script>
+</body>
+</html>

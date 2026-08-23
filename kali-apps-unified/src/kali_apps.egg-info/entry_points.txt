@@ -1,0 +1,9 @@
+[console_scripts]
+KALI_hash = kali_apps.KALI_hash:main
+KALI_non-hash = kali_apps.KALI_non_hash:main
+kali-downloader = kali_apps.kali_downloader:main
+kali-prepare-metadata = kali_apps.prepare_metadata:main
+kali-rf-distance = kali_apps._cli_shims:rf_distance_entrypoint
+kali-tensor = kali_apps.kali_tensor:main
+kali-tree = kali_apps.kali_tree:main
+pykali_hash = kali_apps.pykali_hash:main
